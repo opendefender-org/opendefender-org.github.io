@@ -306,14 +306,17 @@
   ];
 
   demoPoints.forEach(p => {
-    L.circleMarker([p.lat, p.lon], {
-      radius: 10,
-      color: '#ff6b6b',
-      fillColor: '#ff6b6b',
-      fillOpacity: 0.5
-    }).addTo(map).bindPopup(p.text);
-  });
+  L.circle([p.lat, p.lon], {
+    radius: 500,            // 500 meter
+    color: '#ff6b6b',
+    fillColor: '#ff6b6b',
+    fillOpacity: 0.35,
+    weight: 2               // litt tynnere linje
+  }).addTo(map).bindPopup(p.text);
+});
+
 </script>
 </body>
 </html>
+
 
