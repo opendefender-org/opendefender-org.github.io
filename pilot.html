@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pilotdashboard – OpenDefender SnapThreatMap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+    name="description"
+    content="Pilotdashboard for SnapThreatMap med syntetiske data. Viser hvordan ansvarlige aktører kan få oversikt over risikoområder, tidsutvikling, arenaer og varsler uten å identifisere enkeltpersoner."
+  />
+
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-elevated: #151a2b;
+      --accent: #3ba4ff;
+      --text-main: #f5f5f7;
+      --text-muted: #c3c7d6;
+      --border-soft: #22283a;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.35);
+      --max-width: 1200px;
+      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --danger: #fb7185;
+      --ok: #4ade80;
+      --warn: #facc15;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: var(--font-main);
+      background: radial-gradient(circle at top, #151b33 0, #050713 60%, #02030a 100%);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(14px);
+      background: rgba(5, 7, 19, 0.92);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .nav {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0.6rem 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #81e6ff, #3b82f6 40%, #111827 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #020617;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+    }
+
+    .logo-text-main {
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+    }
+
+    .logo-text-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-link {
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      background: transparent;
+    }
+
+    .nav-link:hover {
+      border-color: rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--text-main);
+    }
+
+    .nav-link-primary {
+      background: linear-gradient(120deg, #3ba4ff, #7dd3fc);
+      color: #020617;
+      border-color: transparent;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(59, 164, 255, 0.35);
+    }
+
+    main { flex: 1; }
+
+    .section {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 2.2rem 1.4rem 2.6rem;
+    }
+
+    @media (max-width: 900px) {
+      .nav { padding-inline: 1rem; }
+      .section { padding-inline: 1rem; }
+    }
+
+    .eyebrow {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .title-row h1 {
+      font-size: 1.6rem;
+      margin: 0;
+    }
+
+    .badge-demo {
+      font-size: 0.78rem;
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(234, 179, 8, 0.08);
+      border: 1px solid rgba(250, 204, 21, 0.7);
+      color: #facc15;
+    }
+
+    .lead {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 0.7rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .banner {
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(250, 204, 21, 0.6);
+      padding: 0.7rem 0.9rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.4rem;
+    }
+
+    .banner strong {
+      color: var(--warn);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.9rem;
+      margin-bottom: 1.4rem;
+    }
+
+    @media (max-width: 750px) {
+      .metrics {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .metric-card {
+      background: var(--bg-elevated);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-soft);
+      padding: 0.9rem;
+    }
+
+    .metric-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .metric-value {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+
+    .metric-note {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .metric-value.ok { color: var(--ok); }
+    .metric-value.warn { color: var(--warn); }
+    .metric-value.danger { color: var(--danger); }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.2fr);
+      gap: 1.2rem;
+      margin-bottom: 1.4rem;
+    }
+
+    @media (max-width: 1050px) {
+      .dashboard-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: var(--bg-elevated);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-soft);
+      padding: 1rem;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      margin-top: 0;
+      margin-bottom: 0.4rem;
+    }
+
+    .card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin: 0.2rem 0 0.7rem;
+    }
+
+    /* Kart */
+    #pilotMap {
+      height: 260px;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 0.7rem;
+    }
+
+    .timeline {
+      margin-top: 0.4rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .timeline-bar {
+      margin-top: 0.3rem;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(31, 41, 55, 0.95);
+      overflow: hidden;
+      display: flex;
+    }
+
+    .timeline-segment {
+      height: 100%;
+    }
+
+    .seg-low { background: #22c55e; }
+    .seg-mid { background: #eab308; }
+    .seg-high { background: #ef4444; }
+
+    /* Tabell */
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+    }
+
+    @media (max-width: 700px) {
+      .filters {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      margin-bottom: 0.2rem;
+    }
+
+    select {
+      width: 100%;
+      padding: 0.45rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: #020617;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.85rem;
+    }
+
+    .table-wrapper {
+      margin-top: 0.6rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-soft);
+      overflow: hidden;
+      background: #020617;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    thead {
+      background: rgba(15, 23, 42, 0.98);
+    }
+
+    th, td {
+      padding: 0.45rem 0.7rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+    }
+
+    th {
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.12rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    .status-pill.ok {
+      border-color: rgba(74, 222, 128, 0.6);
+      color: var(--ok);
+    }
+
+    .status-pill.warn {
+      border-color: rgba(250, 204, 21, 0.6);
+      color: var(--warn);
+    }
+
+    .status-pill.danger {
+      border-color: rgba(248, 113, 113, 0.7);
+      color: var(--danger);
+    }
+
+    /* Nedre rad: arena, plattform, tiltak, tidlige signaler */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
+      gap: 1.2rem;
+      margin-top: 1.2rem;
+    }
+
+    @media (max-width: 1050px) {
+      .bottom-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .sub-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 0.9rem;
+    }
+
+    @media (max-width: 650px) {
+      .sub-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .bar-list {
+      margin-top: 0.45rem;
+    }
+
+    .bar-item {
+      margin-bottom: 0.35rem;
+    }
+
+    .bar-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.15rem;
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.95);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #3ba4ff, #7dd3fc);
+    }
+
+    .tiltak-list {
+      margin-top: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .tiltak-item {
+      padding: 0.55rem 0.7rem;
+      border-radius: var(--radius-md);
+      background: #020617;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+    }
+
+    .tiltak-title {
+      font-size: 0.85rem;
+      color: var(--text-main);
+      margin-bottom: 0.15rem;
+    }
+
+    .signal-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.5rem;
+      font-size: 0.78rem;
+    }
+
+    .chip {
+      padding: 0.18rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-muted);
+    }
+
+    .chip.warn {
+      border-color: rgba(250, 204, 21, 0.75);
+      color: var(--warn);
+    }
+
+    .chip.danger {
+      border-color: rgba(248, 113, 113, 0.85);
+      color: var(--danger);
+    }
+
+    footer {
+      border-top: 1px solid rgba(15, 23, 42, 0.9);
+      background: #020617;
+      padding: 1.4rem 1.4rem 1.8rem;
+      margin-top: 1.8rem;
+    }
+
+    .footer-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .back-link {
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+    }
+
+    .back-link:hover { color: var(--text-main); }
+  </style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <nav class="nav" aria-label="Hovedmeny">
+      <div class="nav-left">
+        <div class="logo-icon">OD</div>
+        <div>
+          <div class="logo-text-main">OpenDefender</div>
+          <div class="logo-text-sub">SnapThreatMap</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a class="nav-link" href="index.html#about">Hva er dette?</a>
+        <a class="nav-link" href="kart.html">Trusselkart</a>
+        <a class="nav-link" href="varsle.html">Varsle anonymt</a>
+        <a class="nav-link" href="om.html">Om prosjektet</a>
+        <a class="nav-link-primary" href="pilot.html">Pilotdashboard</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="eyebrow">Intern visning · syntetiske data</div>
+      <div class="title-row">
+        <h1>Pilotdashboard for SnapThreatMap</h1>
+        <span class="badge-demo">DEMO · ingen reelle hendelser</span>
+      </div>
+      <p class="lead">
+        Dashboardet viser hvordan en kommune, skole eller forebyggende enhet kan få
+        oversikt over varsler, risikosoner og trender. Alle tall og data på denne siden
+        er <strong>syntetiske</strong> og brukes kun til demo og opplæring.
+      </p>
+
+      <div class="banner">
+        <strong>Viktig:</strong> Denne visningen skal ikke brukes til operative beslutninger.
+        Ingen personopplysninger eller reelle hendelser vises her. All bruk mot virkelige data
+        skal skje under lokalt mandat, med egne vurderinger av personvern og lovlighet.
+      </div>
+
+      <!-- KPI-kort -->
+      <div class="metrics">
+        <div class="metric-card">
+          <div class="metric-label">Varsler siste 7 dager (demo)</div>
+          <div class="metric-value warn">14</div>
+          <div class="metric-note">Basert på syntetiske eksempelvarsler.</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Aktive risikosoner (demo)</div>
+          <div class="metric-value danger">3</div>
+          <div class="metric-note">Områder med moderat/høy simulert aktivitet.</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Andel varsler vurdert (demo)</div>
+          <div class="metric-value ok">76%</div>
+          <div class="metric-note">Vurdert av fagpersoner i simulert pilot.</div>
+        </div>
+      </div>
+
+      <!-- Hovedgrid: kart + varslingsliste -->
+      <div class="dashboard-grid">
+        <!-- Venstre side: Kart + tidslinje -->
+        <div class="card">
+          <h2>Kart og risikosoner (demo)</h2>
+          <p>
+            Illustrerer hvordan aggregerte soner kan vises i et kart, med
+            risikonivå på områdenivå – ikke individnivå.
+          </p>
+
+          <div id="pilotMap"></div>
+
+          <div class="timeline">
+            Aktivitet over tid (syntetisk eksempel)
+            <div class="timeline-bar">
+              <div class="timeline-segment seg-low" style="width: 25%;"></div>
+              <div class="timeline-segment seg-mid" style="width: 35%;"></div>
+              <div class="timeline-segment seg-high" style="width: 40%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Høyre side: Varsler (tabell) -->
+        <div class="card">
+          <h2>Varsler (syntetiske)</h2>
+          <p>
+            Eksempel på hvordan innkomne varsler kan struktureres for videre
+            faglig vurdering. Alle oppføringer under er genererte eksempler.
+          </p>
+
+         <div class="filters">
+  <div>
+    <label for="filter-område">Område</label>
+    <select id="filter-område">
+      <option value="alle">Alle områder (demo)</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="filter-kategori">Kategori</label>
+    <select id="filter-kategori">
+      <option value="alle">Alle kategorier (demo)</option>
+    </select>
+  </div>
+</div>
+
+<div class="table-wrapper">
+  <table aria-label="Varsler (syntetiske)">
+    <thead>
+      <tr>
+        <th>Tidspunkt</th>
+        <th>Område</th>
+        <th>Plattform</th>
+        <th>Kategori</th>
+        <th>Risiko</th>
+      </tr>
+    </thead>
+    <tbody id="alertsBody">
+      <!-- fylles av JavaScript -->
+    </tbody>
+  </table>
+</div>
+
+          <p class="lead" style="font-size:0.78rem;margin-top:0.7rem;">
+            I en reell pilotversjon vil alle vurderinger gjøres av fagpersoner
+            med lokalt mandat. Dashboardet er kun et støtteverktøy.
+          </p>
+        </div>
+      </div>
+
+      <!-- Nedre rad: arena + plattform + tiltak + tidlige signaler -->
+      <div class="bottom-grid">
+        <!-- Venstre: Arena + Plattform -->
+        <div class="card">
+          <h2>Oversiktsbilde (arenaer og plattformer)</h2>
+          <p>
+            Gir et raskt bilde av hvilke typer arenaer som er mest berørt, og
+            hvilke digitale plattformer som oftest inngår i varsler (demo).
+          </p>
+
+          <div class="sub-grid">
+            <!-- Arena-risiko -->
+            <div>
+              <h3 style="font-size:0.9rem;margin:0 0 0.2rem;">Risiko etter arena (demo)</h3>
+              <div class="bar-list">
+                <div class="bar-item">
+                  <div class="bar-label">Skole- og oppvekstarena</div>
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width: 80%;"></div>
+                  </div>
+                </div>
+                <div class="bar-item">
+                  <div class="bar-label">Kollektiv / knutepunkt</div>
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width: 60%;"></div>
+                  </div>
+                </div>
+                <div class="bar-item">
+                  <div class="bar-label">Fritidsarena / kjøpesenter</div>
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width: 45%;"></div>
+                  </div>
+                </div>
+                <div class="bar-item">
+                  <div class="bar-label">Boligområder</div>
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width: 35%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Plattform-fordeling -->
+            <div>
+              <h3 style="font-size:0.9rem;margin:0 0 0.2rem;">Varsler per plattform (demo)</h3>
+              <div class="bar-list">
+                <div class="bar-item">
+                  <div class="bar-label">Snapchat</div>
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width: 75%;"></div>
+                  </div>
+                </div>
+                <div class="bar-item">
+                  <div class="bar-label">TikTok</div>
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width: 55%;"></div>
+                  </div>
+                </div>
+                <div class="bar-item">
+                  <div class="bar-label">Instagram</div>
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width: 40%;"></div>
+                  </div>
+                </div>
+                <div class="bar-item">
+                  <div class="bar-label">Discord / annet</div>
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width: 30%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Høyre: Tiltak + tidlige signaler -->
+        <div class="card">
+          <h2>Tiltak og tidlige signaler (demo)</h2>
+          <p>
+            Viser hvordan observasjoner og tiltak kan dokumenteres sammen. Data
+            under er kun eksempler, ikke reelle hendelser.
+          </p>
+
+          <div class="tiltak-list">
+            <div class="tiltak-item">
+              <div class="tiltak-title">Trygghetsvandring – Testområde B</div>
+              <div>
+                12.03 · gjennomført av kommune og forebyggende politi.
+                Fokus på synlighet, dialog med ungdom og nærmiljø (demo).
+              </div>
+              <div>
+                Observasjon: simulert nedgang i aktivitet kveldstid uken etter.
+              </div>
+            </div>
+            <div class="tiltak-item">
+              <div class="tiltak-title">Informasjonsmøte – skole / foresatte</div>
+              <div>
+                10.03 · simulert samarbeidsmøte mellom skole, FAU og politi om
+                digital risiko og forebygging (demo).
+              </div>
+              <div>
+                Bruk av anonymiserte eksempler fra SnapThreatMap som
+                utgangspunkt for dialog.
+              </div>
+            </div>
+            <div class="tiltak-item">
+              <div class="tiltak-title">Miljøarbeid – oppsøkende tilstedeværelse</div>
+              <div>
+                09.03 · simulert økt tilstedeværelse fra utekontakt i Testområde A
+                på ettermiddag og kveld (demo).
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:0.9rem;border-top:1px solid rgba(31,41,55,0.9);padding-top:0.7rem;">
+            <h3 style="font-size:0.9rem;margin:0 0 0.2rem;">Tidlige varselsignaler (DIPD – demo)</h3>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin:0 0 0.4rem;">
+              Enkel oversikt over områder der det simuleres gjentatte hendelser over tid.
+              Dette er en mild forsmak på hvordan DIPD-rammeverket kan brukes til å
+              identifisere trinnvise digitale påvirkningsmønstre.
+            </p>
+            <div class="signal-chips">
+              <span class="chip warn">2 områder med økende trend (demo)</span>
+              <span class="chip danger">5 sekvenser med gjentatte hendelser (demo)</span>
+              <span class="chip">Foreslått faglig gjennomgang innen 7 dager (demo)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div>© OpenDefender Initiative – SnapThreatMap</div>
+      <a href="index.html" class="back-link">Tilbake til forsiden</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+  // ----------------------------------------------------------
+  // DEMO-KART FOR PILOTDASHBOARD (syntetiske områder)
+  // ----------------------------------------------------------
+  var map = L.map('pilotMap').setView([59.9139, 10.7522], 12);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap-bidragsytere'
+  }).addTo(map);
+
+  var demoZones = [
+      { lat: 59.927, lon: 10.752, radius: 700, label: "Testområde A" },
+      { lat: 59.905, lon: 10.775, radius: 700, label: "Testområde B" },
+      { lat: 59.917, lon: 10.698, radius: 700, label: "Testområde C" }
+  ];
+
+  demoZones.forEach(function(zone){
+      L.circle([zone.lat, zone.lon], {
+          color: "#fb7185",
+          fillColor: "#fb7185",
+          fillOpacity: 0.25,
+          radius: zone.radius
+      }).addTo(map)
+        .bindPopup("<strong>" + zone.label + "</strong><br><em>Kunstig datasone (demo)</em>");
+  });
+
+  // ----------------------------------------------------------
+  // VARSLER – DEMODATA + FILTRERING
+  // ----------------------------------------------------------
+
+  // Syntetiske varsler
+  const alerts = [
+    {
+      time: "12.03 · 20:14",
+      area: "Testområde B",
+      platform: "Snapchat",
+      category: "Rekruttering (demo)",
+      risk: "Høy"
+    },
+    {
+      time: "12.03 · 18:47",
+      area: "Testområde A",
+      platform: "TikTok",
+      category: "Samlingspunkt (demo)",
+      risk: "Moderat"
+    },
+    {
+      time: "11.03 · 21:05",
+      area: "Testområde B",
+      platform: "Instagram",
+      category: "Uro/trygghet (demo)",
+      risk: "Moderat"
+    },
+    {
+      time: "10.03 · 16:32",
+      area: "Testområde C",
+      platform: "Discord",
+      category: "Digital aktivitet (demo)",
+      risk: "Lav"
+    }
+  ];
+
+  const areaSelect = document.getElementById("filter-område");
+  const categorySelect = document.getElementById("filter-kategori");
+  const tbody = document.getElementById("alertsBody");
+
+  // Fyll nedtrekkslister med unike områder og kategorier
+  function populateFilters() {
+    const areas = Array.from(new Set(alerts.map(a => a.area))).sort();
+    const categories = Array.from(new Set(alerts.map(a => a.category))).sort();
+
+    areas.forEach(area => {
+      const opt = document.createElement("option");
+      opt.value = area;
+      opt.textContent = area;
+      areaSelect.appendChild(opt);
+    });
+
+    categories.forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat;
+      categorySelect.appendChild(opt);
+    });
+  }
+
+  // Lag riktige farger på risikonivået
+  function riskClass(risk) {
+    if (risk === "Høy") return "danger";
+    if (risk === "Moderat") return "warn";
+    return "ok";
+  }
+
+  // Tegn tabellen basert på valgt filter
+  function renderTable() {
+    const areaFilter = areaSelect.value;
+    const categoryFilter = categorySelect.value;
+
+    // Filtrer
+    const filtered = alerts.filter(a => {
+      const matchArea = (areaFilter === "alle") || (a.area === areaFilter);
+      const matchCategory = (categoryFilter === "alle") || (a.category === categoryFilter);
+      return matchArea && matchCategory;
+    });
+
+    // Rens tabellen
+    tbody.innerHTML = "";
+
+    // Fyll med rader
+    filtered.forEach(a => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${a.time}</td>
+        <td>${a.area}</td>
+        <td>${a.platform}</td>
+        <td>${a.category}</td>
+        <td><span class="status-pill ${riskClass(a.risk)}">${a.risk}</span></td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Init
+  populateFilters();
+  renderTable();
+
+  // Koble event-handlere
+  areaSelect.addEventListener("change", renderTable);
+  categorySelect.addEventListener("change", renderTable);
+</script>
+</body>
+</html>

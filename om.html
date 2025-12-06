@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <title>Om prosjektet – OpenDefender SnapThreatMap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+    name="description"
+    content="Informasjon om OpenDefender-initiativet og SnapThreatMap-prosjektet. Nøytral plattform for digital trygghet, forebygging og analyse av risikomønstre uten overvåking av enkeltpersoner."
+  />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-elevated: #151a2b;
+      --accent: #3ba4ff;
+      --text-main: #f5f5f7;
+      --text-muted: #c3c7d6;
+      --border-soft: #22283a;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.35);
+      --max-width: 900px;
+      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: var(--font-main);
+      background: radial-gradient(circle at top, #151b33 0, #050713 60%, #02030a 100%);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(14px);
+      background: rgba(5, 7, 19, 0.92);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .nav {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0.6rem 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #81e6ff, #3b82f6 40%, #111827 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #020617;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+    }
+
+    .logo-text-main {
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+    }
+
+    .logo-text-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-link {
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      background: transparent;
+    }
+
+    .nav-link:hover {
+      border-color: rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--text-main);
+    }
+
+    .nav-link-primary {
+      background: linear-gradient(120deg, #3ba4ff, #7dd3fc);
+      color: #020617;
+      border-color: transparent;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(59, 164, 255, 0.35);
+    }
+
+    main { flex: 1; }
+
+    .section {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 2.4rem 1.4rem 2.8rem;
+    }
+
+    @media (max-width: 900px) {
+      .nav { padding-inline: 1rem; }
+      .section { padding-inline: 1rem; }
+    }
+
+    .eyebrow {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+
+    .title {
+      font-size: 1.8rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .lead {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 1.6rem;
+      max-width: 40rem;
+    }
+
+    .block {
+      background: var(--bg-elevated);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-soft);
+      padding: 1.4rem 1.3rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .block h2 {
+      font-size: 1.1rem;
+      margin-top: 0;
+      margin-bottom: 0.4rem;
+    }
+
+    .block p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin: 0.3rem 0;
+      line-height: 1.6;
+    }
+
+    .block ul {
+      margin: 0.4rem 0 0.2rem;
+      padding-left: 1.1rem;
+    }
+
+    .block li {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: 0.4rem;
+    }
+
+    .tag {
+      font-size: 0.78rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      color: var(--text-muted);
+    }
+
+    .note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    footer {
+      border-top: 1px solid rgba(15, 23, 42, 0.9);
+      background: #020617;
+      padding: 1.4rem 1.4rem 1.8rem;
+      margin-top: 1.8rem;
+    }
+
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .back-link {
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+    }
+
+    .back-link:hover { color: var(--text-main); }
+  </style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <nav class="nav" aria-label="Hovedmeny">
+      <div class="nav-left">
+        <div class="logo-icon">OD</div>
+        <div>
+          <div class="logo-text-main">OpenDefender</div>
+          <div class="logo-text-sub">SnapThreatMap</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a class="nav-link" href="index.html#about">Hva er dette?</a>
+        <a class="nav-link" href="kart.html">Trusselkart</a>
+        <a class="nav-link" href="varsle.html">Varsle anonymt</a>
+        <a class="nav-link" href="om.html">Om prosjektet</a>
+        <a class="nav-link-primary" href="pilot.html">Pilotdashboard</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="eyebrow">Bakgrunn og formål</div>
+      <h1 class="title">Om OpenDefender og SnapThreatMap</h1>
+      <p class="lead">
+        OpenDefender er et uavhengig initiativ som utvikler åpne, etiske verktøy for
+        digital trygghet og forebygging. SnapThreatMap er første modul – et
+        verktøy for å forstå hvor digitale risikomønstre oppstår, uten å spore
+        enkeltpersoner.
+      </p>
+
+      <div class="block">
+        <h2>Hvorfor dette prosjektet?</h2>
+        <p>
+          Barn og unge møter digitale risikoer som utvikler seg raskt. Skoler,
+          kommuner og politi får ofte fragmentert informasjon – og mangler
+          verktøy som gir oversikt uten å gå på kompromiss med personvern.
+        </p>
+        <p>
+          SnapThreatMap er utviklet for å gi ansvarlige aktører et rolig, strukturert
+          og gjennomsiktig beslutningsgrunnlag, basert på data som allerede er
+          offentlig tilgjengelig.
+        </p>
+      </div>
+
+      <div class="block">
+        <h2>Overordnet mål</h2>
+        <p>Prosjektet har tre hovedmål:</p>
+        <ul>
+          <li>Støtte forebyggende arbeid mot rekruttering, utnyttelse og kriminalitet.</li>
+          <li>Tilby åpne, etterprøvbare verktøy som kan brukes av flere kommuner og miljøer.</li>
+          <li>Sikre at alt arbeid skjer innenfor tydelige etiske og juridiske rammer.</li>
+        </ul>
+        <div class="tags">
+          <span class="tag">Forebygging</span>
+          <span class="tag">Åpen kildekode</span>
+          <span class="tag">Personvern</span>
+          <span class="tag">Forskning og utvikling</span>
+        </div>
+      </div>
+
+      <div class="block">
+        <h2>Hva verktøyet ikke gjør</h2>
+        <p>
+          Det er viktig å være tydelig på begrensninger. SnapThreatMap er
+          <strong>ikke</strong> et overvåkingssystem og <strong>ikke</strong> et
+          etterretningsverktøy for å følge enkeltpersoner.
+        </p>
+        <ul>
+          <li>Ingen personprofiler eller sporing av enkeltindivider.</li>
+          <li>Ingen innhenting fra lukkede kontoer eller lukkede grupper.</li>
+          <li>Ingen bruk av hacking, omgåelse av tilgangskontroll eller skjult innhenting.</li>
+          <li>Ingen kommersiell bruk av data.</li>
+        </ul>
+        <p class="note">
+          Systemet er designet for å vise områder og mønstre, ikke hvem enkeltpersoner er.
+        </p>
+      </div>
+
+      <div class="block">
+        <h2>Hvordan behandles data?</h2>
+        <p>
+          All funksjonalitet i OpenDefender er bygget etter prinsippet
+          <em>Privacy by Design</em>. Det betyr blant annet:
+        </p>
+        <ul>
+          <li>bruk av kun offentlig tilgjengelig informasjon</li>
+          <li>dataminimering – kun det som er nødvendig for å forstå mønstre</li>
+          <li>lokal behandling hos den aktøren som har mandat (kommune, skole, politi)</li>
+          <li>ingen sentral database hos OpenDefender som inneholder operative data</li>
+        </ul>
+        <p class="note">
+          Alle piloter og eventuell produksjonsbruk skal ledsages av lokale vurderinger
+          av personvern og lovlighet.
+        </p>
+      </div>
+
+      <div class="block">
+        <h2>Hvem kan bruke SnapThreatMap?</h2>
+        <p>
+          Verktøyet er utviklet for ansvarlige aktører med et forebyggende mandat, for eksempel:
+        </p>
+        <ul>
+          <li>kommuner og deres trygghets- og oppvekstteam</li>
+          <li>skoler og tverrfaglige samarbeidsteam</li>
+          <li>forebyggende politi og andre relevante enheter</li>
+          <li>forskning- og fagmiljøer som arbeider med digital trygghet</li>
+        </ul>
+      </div>
+
+      <div class="block">
+        <h2>Videre utvikling</h2>
+        <p>
+          SnapThreatMap er første steg i OpenDefender-initiativet. Videre arbeid omfatter blant annet:
+        </p>
+        <ul>
+          <li>videreutvikling av demo- og pilotløsninger med syntetiske data</li>
+          <li>integrasjon mot DIPD-rammeverket (Desentralisert Incremental Payload Delivery)</li>
+          <li>forskning på nye metoder for å oppdage trinnvise digitale påvirkningsmønstre</li>
+          <li>utprøving sammen med utvalgte kommuner og fagmiljø</li>
+        </ul>
+        <p class="note">
+          All videre utvikling skjer i dialog med fagpersoner, personvernrådgivere og relevante myndigheter.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div>© OpenDefender Initiative – SnapThreatMap</div>
+      <a href="index.html" class="back-link">Tilbake til forsiden</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
