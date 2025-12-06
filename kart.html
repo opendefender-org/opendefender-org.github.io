@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SnapThreatMap – Trusselkart (demo)</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-elevated: #151a2b;
+      --accent: #3ba4ff;
+      --text-main: #f5f5f7;
+      --text-muted: #c3c7d6;
+      --border-soft: #22283a;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.35);
+      --max-width: 1100px;
+      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: var(--font-main);
+      background: radial-gradient(circle at top, #151b33 0, #050713 60%, #02030a 100%);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(14px);
+      background: rgba(5, 7, 19, 0.92);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .nav {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0.6rem 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #81e6ff, #3b82f6 40%, #111827 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #020617;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+    }
+
+    .logo-text-main {
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+    }
+
+    .logo-text-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-link {
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      background: transparent;
+    }
+
+    .nav-link:hover {
+      border-color: rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--text-main);
+    }
+
+    .nav-link-primary {
+      background: linear-gradient(120deg, #3ba4ff, #7dd3fc);
+      color: #020617;
+      border-color: transparent;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(59, 164, 255, 0.35);
+    }
+
+    main { flex: 1; }
+
+    .section {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 2.2rem 1.4rem 2.6rem;
+    }
+
+    @media (max-width: 900px) {
+      .nav { padding-inline: 1rem; }
+      .section { padding-inline: 1rem; }
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .section-subtitle {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      max-width: 40rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .map-card {
+      background: var(--bg-elevated);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-soft);
+      padding: 1rem;
+    }
+
+    .map-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.7rem;
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .map-header-title {
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+
+    .pill {
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    #map {
+      height: 70vh;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .map-footer {
+      margin-top: 0.7rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    footer {
+      border-top: 1px solid rgba(15, 23, 42, 0.9);
+      background: #020617;
+      padding: 1.4rem 1.4rem 1.8rem;
+      margin-top: 1.8rem;
+    }
+
+    .footer-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .back-link {
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+    }
+
+    .back-link:hover {
+      color: var(--text-main);
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <nav class="nav" aria-label="Hovedmeny">
+      <div class="nav-left">
+        <div class="logo-icon">OD</div>
+        <div>
+          <div class="logo-text-main">OpenDefender</div>
+          <div class="logo-text-sub">SnapThreatMap</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a class="nav-link" href="index.html#about">Hva er dette?</a>
+        <a class="nav-link" href="kart.html">Trusselkart</a>
+        <a class="nav-link" href="varsle.html">Varsle anonymt</a>
+        <a class="nav-link" href="index.html#ethics">Etikk</a>
+        <a class="nav-link-primary" href="index.html#contact">Kontakt</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="section">
+      <h1 class="section-title">Trusselkart – demo</h1>
+      <p class="section-subtitle">
+        Dette kartet viser et <strong>syntetisk eksempel</strong> på hvordan
+        SnapThreatMap kan visualisere aggregerte risikoområder basert på
+        anonymiserte datapunkter. Ingen virkelige personer vises her.
+      </p>
+
+      <div class="map-card">
+        <div class="map-header">
+          <div>
+            <div class="map-header-title">Kartvisning (Leaflet)</div>
+            <div>Zoom inn, panorer og utforsk områder.</div>
+          </div>
+          <div class="pill">Demo – ingen persondata</div>
+        </div>
+
+        <div id="map"></div>
+
+        <div class="map-footer">
+          <span>Basert på åpne kartdata.</span>
+          <span>Kan kobles til lokal drift hos kommune/politi.</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div>© OpenDefender Initiative – SnapThreatMap</div>
+      <a href="index.html" class="back-link">Tilbake til forsiden</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+  // Enkel Leaflet-init. Bytt til ønsket koordinat/zoom.
+  const map = L.map('map').setView([59.91, 10.75], 11);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap-bidragsytere'
+  }).addTo(map);
+
+  // Eksempelmarkører/heatpunkter – bytes til egen logikk senere.
+  const demoPoints = [
+    { lat: 59.93, lon: 10.75, text: 'Syntetisk sone A' },
+    { lat: 59.90, lon: 10.78, text: 'Syntetisk sone B' },
+    { lat: 59.92, lon: 10.70, text: 'Syntetisk sone C' }
+  ];
+
+  demoPoints.forEach(p => {
+    L.circleMarker([p.lat, p.lon], {
+      radius: 10,
+      color: '#ff6b6b',
+      fillColor: '#ff6b6b',
+      fillOpacity: 0.5
+    }).addTo(map).bindPopup(p.text);
+  });
+</script>
+</body>
+</html>

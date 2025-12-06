@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <title>OpenDefender – SnapThreatMap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+    name="description"
+    content="OpenDefender – SnapThreatMap. Et åpent, etisk verktøy for å forstå digitale risikomønstre i lokalsamfunn."
+  />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-elevated: #151a2b;
+      --accent: #3ba4ff;
+      --accent-soft: rgba(59, 164, 255, 0.1);
+      --text-main: #f5f5f7;
+      --text-muted: #c3c7d6;
+      --border-soft: #22283a;
+      --danger: #ff6b6b;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.35);
+      --max-width: 1100px;
+      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-main);
+      background: radial-gradient(circle at top, #151b33 0, #050713 60%, #02030a 100%);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(14px);
+      background: rgba(5, 7, 19, 0.92);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .nav {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0.6rem 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #81e6ff, #3b82f6 40%, #111827 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #020617;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+    }
+
+    .logo-text-main {
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+    }
+
+    .logo-text-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-link {
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      background: transparent;
+    }
+
+    .nav-link:hover {
+      border-color: rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--text-main);
+    }
+
+    .nav-link-primary {
+      background: linear-gradient(120deg, #3ba4ff, #7dd3fc);
+      color: #020617;
+      border-color: transparent;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(59, 164, 255, 0.35);
+    }
+
+    .nav-link-primary:hover {
+      filter: brightness(1.05);
+    }
+
+    main {
+      flex: 1;
+    }
+
+    .section {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 2.5rem 1.4rem;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.1fr);
+      gap: 2rem;
+      align-items: center;
+      padding-top: 2.4rem;
+      padding-bottom: 2.6rem;
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .nav {
+        padding-inline: 1rem;
+      }
+      .section {
+        padding-inline: 1rem;
+      }
+    }
+
+    .hero-eyebrow {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      margin-bottom: 0.8rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2.1rem, 3vw + 1rem, 2.9rem);
+      line-height: 1.1;
+      margin: 0 0 0.9rem;
+    }
+
+    .hero-title span {
+      color: var(--accent);
+    }
+
+    .hero-lead {
+      font-size: 0.98rem;
+      color: var(--text-muted);
+      max-width: 32rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      padding: 0.28rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.85);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1.2rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      border: 1px solid transparent;
+      cursor: pointer;
+      background: transparent;
+      color: inherit;
+    }
+
+    .btn-primary {
+      background: linear-gradient(120deg, #3ba4ff, #7dd3fc);
+      color: #020617;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(59, 164, 255, 0.35);
+    }
+
+    .btn-secondary {
+      border-color: rgba(148, 163, 184, 0.6);
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .btn-secondary span {
+      font-size: 1rem;
+    }
+
+    .hero-note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.6rem;
+    }
+
+    .hero-map-card {
+      background: radial-gradient(circle at top left, #1f2937, #020617);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(148, 163, 184, 0.32);
+      padding: 1.2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-map-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.7rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .hero-map-title {
+      font-weight: 500;
+      color: var(--text-main);
+      font-size: 0.9rem;
+    }
+
+    .pill {
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      color: var(--text-muted);
+    }
+
+    .hero-map-body {
+      background: radial-gradient(circle at top, rgba(59, 164, 255, 0.18), transparent 55%);
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      padding: 0.8rem;
+      min-height: 220px;
+      position: relative;
+    }
+
+    .heat-dot {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(59, 164, 255, 0.9), rgba(59, 164, 255, 0));
+      opacity: 0.85;
+    }
+
+    .heat-dot.danger {
+      background: radial-gradient(circle, rgba(239, 68, 68, 0.95), rgba(239, 68, 68, 0));
+    }
+
+    .hero-map-footer {
+      margin-top: 0.9rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+
+    .hero-badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .section-subtitle {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      max-width: 40rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.2rem;
+    }
+
+    @media (max-width: 900px) {
+      .grid-3 {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: var(--bg-elevated);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-soft);
+      padding: 1rem;
+    }
+
+    .card h3 {
+      font-size: 1rem;
+      margin-top: 0;
+      margin-bottom: 0.4rem;
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .list {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 0;
+    }
+
+    .list li {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .pill-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.78rem;
+      padding: 0.18rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .pill-label span {
+      font-size: 0.9rem;
+    }
+
+    .two-column {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 1.4rem;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 900px) {
+      .two-column {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .badge {
+      font-size: 0.78rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.85);
+    }
+
+    footer {
+      border-top: 1px solid rgba(15, 23, 42, 0.9);
+      background: #020617;
+      padding: 1.4rem 1.4rem 1.8rem;
+      margin-top: 1.8rem;
+    }
+
+    .footer-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .back-to-top {
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+
+    .back-to-top:hover {
+      color: var(--text-main);
+    }
+  </style>
+</head>
+<body>
+<div class="page" id="top">
+  <header>
+    <nav class="nav" aria-label="Hovedmeny">
+      <div class="nav-left">
+        <div class="logo-icon">OD</div>
+        <div>
+          <div class="logo-text-main">OpenDefender</div>
+          <div class="logo-text-sub">SnapThreatMap</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a class="nav-link" href="#about">Hva er dette?</a>
+        <a class="nav-link" href="kart.html">Trusselkart</a>
+        <a class="nav-link" href="varsle.html">Varsle anonymt</a>
+        <a class="nav-link" href="#ethics">Etikk</a>
+        <a class="nav-link-primary" href="#contact">Kontakt</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="section hero" id="about">
+      <div>
+        <div class="hero-eyebrow">Åpen, rolig og forståelig</div>
+        <h1 class="hero-title">
+          Et kart for <span>digitale risikomønstre</span>,
+          ikke for å overvåke mennesker.
+        </h1>
+        <p class="hero-lead">
+          OpenDefender SnapThreatMap er et åpent verktøy som hjelper skoler, kommuner
+          og forebyggende politi å forstå hvor digitale risikosoner oppstår –
+          uten å samle inn data om enkeltpersoner.
+        </p>
+
+        <div class="hero-tags">
+          <div class="tag">Strukturert og forutsigbart grensesnitt</div>
+          <div class="tag">Autisme-vennlig design</div>
+          <div class="tag">Privacy by Design</div>
+        </div>
+
+        <div class="hero-actions">
+          <a href="kart.html" class="btn btn-primary">Åpne trusselkart</a>
+          <a href="varsle.html" class="btn btn-secondary">
+            <span>◼</span> Varsle anonymt
+          </a>
+        </div>
+        <p class="hero-note">
+          Kort fortalt: vi viser mønstre i offentlig data – og gir en trygg kanal
+          for anonym varsling når noe føles galt.
+        </p>
+      </div>
+
+      <div class="hero-map-card" aria-hidden="true">
+        <div class="hero-map-header">
+          <div>
+            <div class="hero-map-title">SnapThreatMap – kartdemo</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);">
+              Klikk “Åpne trusselkart” for å se fullversjon.
+            </div>
+          </div>
+          <div class="pill">Live-demo (syntetiske data)</div>
+        </div>
+        <div class="hero-map-body">
+          <!-- Enkle "heat dots" som illustrasjon -->
+          <div class="heat-dot" style="top:18%;left:25%;"></div>
+          <div class="heat-dot danger" style="top:40%;left:55%;"></div>
+          <div class="heat-dot" style="top:62%;left:30%;"></div>
+          <div class="heat-dot danger" style="top:70%;left:70%;"></div>
+          <div class="heat-dot" style="top:35%;left:80%;"></div>
+        </div>
+        <div class="hero-map-footer">
+          <div class="hero-badges">
+            <div class="hero-badge">Aggregert risiko</div>
+            <div class="hero-badge">Ingen persondata</div>
+          </div>
+          <div style="font-size:0.75rem;">
+            Kartet åpnes i egen side. Ingen logger hvem du er.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Resten av seksjonene (how, who, ethics, contact) er som tidligere -->
+    <!-- HOW IT WORKS -->
+    <section class="section" id="how">
+      <h2 class="section-title">Hvordan fungerer SnapThreatMap?</h2>
+      <p class="section-subtitle">
+        Systemet er bygget i tydelige steg. Hvert steg kan forklares og kontrolleres.
+        Ingen skjulte prosesser. Ingen skjult profilering av mennesker.
+      </p>
+
+      <div class="grid-3">
+        <div class="card">
+          <span class="pill-label"><span>1</span> Offentlige kilder</span>
+          <h3>Vi starter med åpent tilgjengelig data</h3>
+          <p>
+            SnapThreatMap bruker kun data som allerede er offentlig synlig
+            (for eksempel anonyme heatmaps og åpne kartvisninger).
+          </p>
+          <ul class="list">
+            <li>Ingen innlogging</li>
+            <li>Ingen “skjult tilgang”</li>
+            <li>Kun åpne flater</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <span class="pill-label"><span>2</span> Mønstre, ikke personer</span>
+          <h3>Vi ser på hvor, ikke hvem</h3>
+          <p>
+            Systemet omgjør datapunkter til et kart med aktivitet
+            og risikomønstre. Fokuset er på områder, tidspunkter og trender.
+          </p>
+          <ul class="list">
+            <li>Varme kart (heatmaps)</li>
+            <li>Tidslinjer for aktivitet</li>
+            <li>Mulighet for lokal analyse</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <span class="pill-label"><span>3</span> Lokal kontroll</span>
+          <h3>Driftes lokalt av autoriserte aktører</h3>
+          <p>
+            Kommuner, politi eller andre med lovlig mandat kan kjøre SnapThreatMap
+            på egne systemer. OpenDefender drifter ingen sentral database.
+          </p>
+          <ul class="list">
+            <li>Lokale servere eller skyløsning</li>
+            <li>Full kontroll på lagring</li>
+            <li>Tilpasset lokale behov</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHO IS IT FOR -->
+    <section class="section" id="who">
+      <h2 class="section-title">Hvem er dette for?</h2>
+      <p class="section-subtitle">
+        SnapThreatMap er laget for å støtte dem som har ansvar for trygghet i
+        lokalmiljøet – uten å skape mer stress, støy eller kompleksitet.
+      </p>
+
+      <div class="two-column">
+        <div>
+          <div class="badge-row">
+            <span class="badge">Kommuner</span>
+            <span class="badge">Forebyggende politi</span>
+            <span class="badge">Skoler</span>
+            <span class="badge">Trygghetsteam</span>
+          </div>
+          <div class="card">
+            <h3>For deg som trenger oversikt</h3>
+            <p>
+              Mange opplever informasjonsstress. SnapThreatMap er designet
+              for å være rolig, forutsigbart og strukturert – spesielt også
+              for fagpersoner og utviklere med autisme, ADHD eller høy
+              detaljfokus.
+            </p>
+            <ul class="list">
+              <li>Tydelig navigasjon og faste seksjoner</li>
+              <li>Ingen unødvendige animasjoner eller visuell støy</li>
+              <li>Enkel tilgang til “kort versjon” og “mer detaljer”</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Eksempler på bruk</h3>
+          <ul class="list">
+            <li>Identifisere områder der ungdom samles til risikofylt aktivitet</li>
+            <li>Underlag til forebyggende tiltak og tilstedeværelse</li>
+            <li>Støtte for tverrfaglige møter mellom skole, kommune og politi</li>
+            <li>Testing av nye modeller for digital forebygging</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ETHICS -->
+    <section class="section" id="ethics">
+      <h2 class="section-title">Etikk og personvern først</h2>
+      <p class="section-subtitle">
+        OpenDefender er bygget rundt klare grenser. Vi ønsker å beskytte barn,
+        unge og lokalsamfunn – ikke å overvåke mennesker.
+      </p>
+
+      <div class="grid-3">
+        <div class="card">
+          <h3>Ingen personprofiler</h3>
+          <p>
+            Systemet er ikke laget for å spore enkeltpersoner. Datamodellen
+            er områdefokusert, ikke individfokusert.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Privacy by Design</h3>
+          <p>
+            All funksjonalitet er planlagt med dataminimering, lokal behandling
+            og åpen dokumentasjon.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Åpen kildekode</h3>
+          <p>
+            Koden er åpen. Det gjør det mulig for andre å kontrollere hva
+            systemet gjør, og hvordan det brukes.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="section" id="contact">
+      <h2 class="section-title">Kontakt og videre samarbeid</h2>
+      <p class="section-subtitle">
+        Ønsker du å teste SnapThreatMap i en kommune, på en skole eller i et
+        forebyggende miljø? Vi ønsker samarbeid med ansvarlige aktører.
+      </p>
+
+      <div class="two-column">
+        <div class="card">
+          <h3>Kontakt</h3>
+          <p style="font-size:0.9rem;color:var(--text-muted);">
+            For henvendelser om samarbeid, faglige spørsmål eller testing i kommune/skole/politi benytt den felles prosjektadressen:
+          </p>
+          <p style="font-size:0.95rem;margin-top:0.3rem;">
+            <strong>E-post:</strong> opendefender@proton.me  
+          </p>
+          <p style="font-size:0.85rem;color:var(--text-muted);margin-top:0.6rem;">
+            Henvendelser behandles av prosjektteamet og ikke av enkeltpersoner.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Videre vei</h3>
+          <ul class="list">
+            <li>Felles gjennomgang av behov og mandat</li>
+            <li>Prototypetest med syntetiske data</li>
+            <li>Eventuell pilot med lokal databehandling</li>
+            <li>Evaluering sammen med lokale fagmiljø</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div>© OpenDefender Initiative – SnapThreatMap</div>
+      <button class="back-to-top" onclick="document.getElementById('top').scrollIntoView({behavior:'smooth'});">
+        Til toppen
+      </button>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
