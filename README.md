@@ -1,3 +1,6 @@
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+
 # OpenDefender – SnapThreatMap
 ### Åpne verktøy for digital trygghet, forebygging og innsikt  
 **Ingen overvåkning. Ingen identitetssporing. Kun mønstre – aldri mennesker.**
