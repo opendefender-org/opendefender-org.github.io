@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rekrutteringsrisiko – Demo (Falske artister)</title>
+  <meta name="description" content="Demo-dashboard for analyse av rekrutteringsrisiko i musikkprofiler. Kun fiktive artister." />
+  <style>
+    :root{
+      /* Felles OpenDefender-variabler */
+      --bg:#0b1020;
+      --bg-elevated:#151a2b;
+      --accent:#3ba4ff;
+      --text-main:#f5f5f7;
+      --text-muted:#c3c7d6;
+      --border-soft:#22283a;
+      --radius-lg:18px;
+      --radius-md:12px;
+      --shadow-soft:0 18px 40px rgba(0,0,0,0.35);
+      --max-width:1200px;
+      --font-main:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+
+      /* Spesifikt for denne modulen */
+      --card:#111827;
+      --muted:#9ca3af;
+      --text:#e5e7eb;
+      --brand:#60a5fa;
+      --ok:#10b981;
+      --mid:#f59e0b;
+      --high:#ef4444;
+      --ring:#1f2937;
+      --chip:#1f2937;
+      --chip-text:#cbd5e1;
+      --accent-secondary:#7c3aed;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--font-main);
+      background:radial-gradient(circle at top,#151b33 0,#050713 60%,#02030a 100%);
+      color:var(--text-main);
+      -webkit-font-smoothing:antialiased;
+    }
+    a{color:inherit;text-decoration:none}
+
+    .page{
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* Header / nav – som pilot/moduler */
+    header{
+      position:sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter:blur(14px);
+      background:rgba(5,7,19,0.92);
+      border-bottom:1px solid rgba(255,255,255,0.04);
+    }
+    .nav{
+      max-width:var(--max-width);
+      margin:0 auto;
+      padding:0.6rem 1.4rem;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+    }
+    .nav-left{
+      display:flex;
+      align-items:center;
+      gap:0.7rem;
+    }
+    .logo-icon{
+      width:32px;
+      height:32px;
+      border-radius:999px;
+      background:radial-gradient(circle at 30% 20%,#81e6ff,#3b82f6 40%,#111827 100%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:0.9rem;
+      font-weight:700;
+      color:#020617;
+      box-shadow:0 0 0 2px rgba(59,130,246,0.5);
+    }
+    .logo-text-main{
+      font-weight:600;
+      letter-spacing:0.04em;
+      font-size:0.95rem;
+      text-transform:uppercase;
+    }
+    .logo-text-sub{
+      font-size:0.8rem;
+      color:var(--text-muted);
+    }
+    .nav-links{
+      display:flex;
+      align-items:center;
+      gap:0.6rem;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .nav-link{
+      padding:0.35rem 0.85rem;
+      border-radius:999px;
+      font-size:0.82rem;
+      color:var(--text-muted);
+      border:1px solid transparent;
+      background:transparent;
+    }
+    .nav-link:hover{
+      border-color:rgba(148,163,184,0.5);
+      background:rgba(15,23,42,0.8);
+      color:var(--text-main);
+    }
+    .nav-link-primary{
+      background:linear-gradient(120deg,#3ba4ff,#7dd3fc);
+      color:#020617;
+      border-color:transparent;
+      font-weight:600;
+      box-shadow:0 10px 25px rgba(59,164,255,0.35);
+    }
+
+    main{flex:1;}
+
+    .section{
+      max-width:var(--max-width);
+      margin:0 auto;
+      padding:2.2rem 1.4rem 2.6rem;
+    }
+    @media (max-width:900px){
+      .nav{padding-inline:1rem;}
+      .section{padding-inline:1rem;}
+    }
+
+    .eyebrow{
+      font-size:0.78rem;
+      text-transform:uppercase;
+      letter-spacing:0.16em;
+      color:var(--accent);
+      margin-bottom:0.4rem;
+    }
+    .section-title{
+      font-size:1.6rem;
+      margin-bottom:0.35rem;
+    }
+    .section-subtitle{
+      font-size:0.9rem;
+      color:var(--text-muted);
+      max-width:40rem;
+      margin-bottom:1.2rem;
+    }
+
+    /* Filter-rad */
+    .filters-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:0.8rem;
+      margin-bottom:1.3rem;
+      align-items:flex-end;
+    }
+    .filter-group{
+      min-width:160px;
+      font-size:0.8rem;
+      color:var(--text-muted);
+    }
+    .filter-group label{
+      display:block;
+      margin-bottom:0.2rem;
+    }
+
+    .search,.select{
+      background:var(--card);
+      border:1px solid #273244;
+      color:var(--text-main);
+      border-radius:12px;
+      padding:8px 10px;
+      font-size:13px;
+      width:100%;
+    }
+    .chip{
+      background:var(--chip);
+      color:var(--chip-text);
+      border:1px solid #374151;
+      padding:8px 10px;
+      border-radius:12px;
+      font-size:12px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      width:100%;
+    }
+    .chip input[type="range"]{width:140px; flex:1;}
+
+    .legend{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+      font-size:12px;
+    }
+    .dot{
+      width:9px;
+      height:9px;
+      border-radius:2px;
+      display:inline-block;
+      margin-right:4px;
+    }
+    .dot.ok{background:var(--ok)}
+    .dot.mid{background:var(--mid)}
+    .dot.high{background:var(--high)}
+
+    /* Hovedkort og grid (fra opprinnelig fil) */
+    main .section-title-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin:24px 0 8px;
+    }
+
+    .grid{display:grid; grid-template-columns:repeat(12, 1fr); gap:14px}
+    .card{
+      background:var(--card);
+      border:1px solid #1f2937;
+      border-radius:16px;
+      padding:16px;
+      position:relative;
+      overflow:hidden;
+    }
+    .card .tag{
+      position:absolute;
+      right:12px; top:12px;
+      font-size:11px;
+      padding:5px 8px;
+      border-radius:8px;
+      border:1px solid #334155;
+      color:#cbd5e1;
+      background:#0b1220;
+    }
+    .muted{color:var(--muted)}
+
+    .artist-card{
+      grid-column:span 4;
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      min-height:120px;
+    }
+    @media (max-width:1000px){ .artist-card{grid-column:span 6} }
+    @media (max-width:700px){ .artist-card{grid-column:span 12} }
+
+    .avatar{
+      width:64px; height:64px;
+      border-radius:14px;
+      background:#0b1220;
+      border:1px solid #253044;
+      display:grid;
+      place-items:center;
+      font-weight:700;
+    }
+    .artist-info{flex:1}
+    .artist-info h3{margin:0 0 6px 0; font-size:16px}
+    .badges{display:flex; gap:6px; flex-wrap:wrap}
+    .badge{
+      font-size:10px;
+      padding:4px 7px;
+      background:#0d1322;
+      border:1px solid #223047;
+      border-radius:999px;
+      color:#cbd5e1;
+    }
+
+    .score{
+      width:84px; height:84px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      border:1px solid #1f2937;
+      background:radial-gradient(120px 120px at 50% -40%, #172554 0%, #111827 60%);
+      box-shadow:inset 0 0 40px #0007;
+      position:relative;
+    }
+    .score .val{font-size:22px; font-weight:800}
+    .band{font-size:10px; margin-top:2px; color:#cbd5e1}
+
+    .kpi{display:flex; gap:12px; margin-top:10px; flex-wrap:wrap}
+    .kpi .k{
+      background:#0d1322;
+      border:1px solid #223047;
+      border-radius:10px;
+      padding:6px 8px;
+      font-size:11px;
+    }
+
+    .section-title-row h2{margin:0;font-size:18px}
+    .pill{
+      font-size:12px;
+      padding:6px 9px;
+      border:1px solid #334155;
+      border-radius:999px;
+      background:#0d1322;
+    }
+
+    /* Info / tooltip */
+    .info{
+      display:inline-grid;
+      place-items:center;
+      width:16px; height:16px;
+      margin-left:6px;
+      border-radius:50%;
+      border:1px solid #334155;
+      background:#0d1322;
+      color:#cbd5e1;
+      font-size:11px;
+      cursor:help;
+      user-select:none;
+    }
+    #tooltip{
+      position:fixed;
+      z-index:60;
+      max-width:min(420px, 92vw);
+      background:#0b1220;
+      color:#e5e7eb;
+      border:1px solid #223047;
+      padding:10px 12px;
+      border-radius:10px;
+      box-shadow:0 10px 40px #000a;
+      display:none;
+    }
+    #tooltip .h{font-weight:700;margin-bottom:4px}
+    #tooltip .s{color:#cbd5e1;font-size:12px}
+
+    /* Modal */
+    .modal{position:fixed; inset:0; display:none; place-items:center; background:#0009; z-index:50}
+    .modal.open{display:grid}
+    .dialog{
+      width:min(980px, 96vw);
+      max-height:90vh;
+      overflow:auto;
+      background:var(--card);
+      border:1px solid #273244;
+      border-radius:16px;
+      box-shadow:0 30px 80px #000c;
+    }
+    .dialog header{
+      position:sticky;
+      top:0;
+      padding:12px 16px;
+      background:#0b1220;
+      border-bottom:1px solid #273244;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .dialog .content{padding:16px}
+    .close{
+      background:#0b1220;
+      border:1px solid #334155;
+      color:#cbd5e1;
+      padding:6px 10px;
+      border-radius:10px;
+      cursor:pointer;
+    }
+
+    /* Charts */
+    .chart{
+      width:100%;
+      height:180px;
+      background:#0b1220;
+      border:1px solid #223047;
+      border-radius:12px;
+    }
+    .bars{display:flex; gap:8px}
+    .bar{
+      flex:1;
+      background:#0b1220;
+      border:1px solid #223047;
+      border-radius:10px;
+      padding:10px;
+    }
+    .bar .t{font-size:11px;color:#cbd5e1}
+
+    /* Footer – som de andre sidene */
+    footer{
+      border-top:1px solid rgba(15,23,42,0.9);
+      background:#020617;
+      padding:1.4rem 1.4rem 1.8rem;
+      margin-top:1.8rem;
+    }
+    .footer-inner{
+      max-width:var(--max-width);
+      margin:0 auto;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:1rem;
+      flex-wrap:wrap;
+      font-size:0.8rem;
+      color:var(--text-muted);
+    }
+    .back-link{
+      padding:0.35rem 0.8rem;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,0.55);
+      background:rgba(15,23,42,0.95);
+      color:var(--text-muted);
+      font-size:0.78rem;
+    }
+    .back-link:hover{color:var(--text-main);}
+  </style>
+</head>
+<body>
+<div class="page">
+  <header aria-label="Toppmeny">
+    <nav class="nav" aria-label="Hovedmeny">
+      <div class="nav-left">
+        <div class="logo-icon">OD</div>
+        <div>
+          <div class="logo-text-main">OpenDefender</div>
+          <div class="logo-text-sub">SnapThreatMap</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a class="nav-link" href="index.html#about">Hva er dette?</a>
+        <a class="nav-link" href="kart.html">Trusselkart</a>
+        <a class="nav-link" href="varsle.html">Varsle anonymt</a>
+        <a class="nav-link" href="om.html">Om prosjektet</a>
+        <a class="nav-link-primary" href="moduler.html">Moduler</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="eyebrow">Fiktiv modul · Demo · ingen ekte artister</div>
+      <h1 class="section-title">Rekrutteringsrisiko i musikk – Demo</h1>
+      <p class="section-subtitle">
+        Denne siden viser en pedagogisk modell for hvordan innhold i musikkprofiler kan vurderes
+        tematisk – uten å bruke virkelige artister. Alle profiler og tall i denne demoen er
+        <strong>fullt fiktive</strong> og brukes kun til undervisning og forebygging.
+      </p>
+
+      <div class="filters-row" role="region" aria-label="Filter og søk">
+        <div class="filter-group">
+          <label for="q">Søk</label>
+          <input class="search" id="q" placeholder="Søk artist / låt…" aria-label="Søk" />
+        </div>
+        <div class="filter-group">
+          <label for="genre">Sjanger</label>
+          <select class="select" id="genre">
+            <option value="">Alle sjangre</option>
+            <option>Rap/Trap</option>
+            <option>Pop</option>
+            <option>R&B</option>
+            <option>EDM</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="minScore">Min. score</label>
+          <span class="chip">
+            Min. score
+            <input type="range" id="minScore" min="0" max="100" value="0" />
+          </span>
+        </div>
+        <div class="filter-group">
+          <label>Risikonivå</label>
+          <span class="chip legend">
+            <span><span class="dot ok"></span>Lav</span>
+            <span><span class="dot mid"></span>Middels</span>
+            <span><span class="dot high"></span>Høy</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="section-title-row">
+        <h2>Artister (fiktive) – oversikt</h2>
+        <span class="pill" id="count"></span>
+      </div>
+
+      <div class="grid" id="grid" aria-live="polite"></div>
+
+      <div class="section-title-row">
+        <h2>Hva betyr scoren?</h2>
+      </div>
+
+      <div class="grid">
+        <div class="card" style="grid-column: span 6">
+          <h3 style="margin-top:0">Forklaring</h3>
+          <p class="muted">
+            Scoren (0–100) estimerer <em>innholdsbasert</em> rekrutteringsrisiko i musikkprofiler.
+            Vi analyserer tekster (glorifisering av dop/vold), visuelle symboler på cover/thumbnail
+            (våpen, masker, luksusobjekter), lydmønstre (svakt signal), nettverk/samarbeid og metadata.
+            Mot-signaler (anti-dop/anti-vold) trekker scoren ned.
+          </p>
+          <div class="bars" style="margin-top:10px">
+            <div class="bar">
+              <div class="t">0–30 poeng</div>
+              <div class="muted">Lav – normal kultur, lite risikoinnhold.</div>
+            </div>
+            <div class="bar">
+              <div class="t">31–74 poeng</div>
+              <div class="muted">Middels – enkelte risikoelementer og normaliserende referanser.</div>
+            </div>
+            <div class="bar">
+              <div class="t">75–100 poeng</div>
+              <div class="muted">Høy – gjentatt glorifisering, sterk symbolbruk, nettverkstetthet.</div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="grid-column: span 6">
+          <h3 style="margin-top:0">Pedagogisk bruk</h3>
+          <ul>
+            <li>Vis elev/foreldremøter konkrete <strong>faktorer</strong> bak scoren (forklarbarhet).</li>
+            <li>Bruk tidslinjen for å se <strong>trender</strong> – eskalering eller avtrapping.</li>
+            <li>Kryssjekk alltid med <strong>kontekst</strong> (ironi, fiksjon, kunst).</li>
+            <li>Ikke påstå lovbrudd. Vurder <strong>innhold</strong>, ikke personer.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div>
+        Denne demoen bruker kun fiktive artister og er laget for undervisning og forebygging.
+        Innholdsscore betyr ikke påstand om individers handlinger.
+      </div>
+      <a href="moduler.html" class="back-link">Tilbake til moduler</a>
+    </div>
+  </footer>
+</div>
+
+  <!-- Modal for artist -->
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="dialog">
+      <header>
+        <div>
+          <strong id="modalTitle">Artist</strong>
+          <div class="muted" id="modalSub"></div>
+        </div>
+        <div style="display:flex; gap:6px; align-items:center">
+          <span class="info" data-tipkey="pedagogikk" tabindex="0" title="Slik bruker du kortet pedagogisk">i</span>
+          <span class="info" data-tipkey="ansvar" tabindex="0" title="Viktig for ansvarlig bruk">i</span>
+          <button class="close" id="closeBtn" aria-label="Lukk">Lukk ✕</button>
+        </div>
+      </header>
+      <div class="content">
+        <div class="grid">
+          <div class="card" style="grid-column: span 6">
+            <h3 style="margin-top:0">Trend over tid</h3>
+            <canvas id="trend" class="chart" aria-label="Trendgraf" role="img"></canvas>
+          </div>
+          <div class="card" style="grid-column: span 6">
+            <h3 style="margin-top:0">Bidrag til score</h3>
+            <div class="bars" id="factors"></div>
+          </div>
+          <div class="card" style="grid-column: span 12">
+            <h3 style="margin-top:0">Topp-uttrykk funnet</h3>
+            <div id="terms" class="badges"></div>
+          </div>
+          <div class="card" style="grid-column: span 12">
+            <h3 style="margin-top:0">Forklaring</h3>
+            <p id="explain" class="muted"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tooltip" role="tooltip" aria-hidden="true">
+    <div class="h" id="tt-h"></div>
+    <div class="s" id="tt-s"></div>
+  </div>
+
+  <script>
+  // ------- HJELPETEKSTER (popovers) -------
+  const HELP = {
+    score: {
+      h: 'Samlet rekrutteringsrisiko (0–100)',
+      s: 'Tolkning: 0–30 Lav, 31–74 Middels, 75–100 Høy. Beregnes fra tekst, visuelt, lyd, nettverk og metadata – minus mot-signaler. Høy score = mye innhold som kan normalisere/glorifisere dop/vold/krim. Ikke en påstand om kriminalitet.'
+    },
+    tag: {
+      h: 'Land/region og sjanger',
+      s: 'Hjelper å forstå kontekst og mulig slang. Vi scorer innholdet, ikke sjangeren (unngå sjanger-bias).'
+    },
+    badges: {
+      h: 'Merker',
+      s: '"Explicit": Spotify-flagget for språk/innhold (svakt signal alene). "Sterk visuell symbolikk": funn av våpen/masker/luksusobjekter/kontanter i artwork/videoer – sterkere signal når realistisk og hyppig.'
+    },
+    lyrics: {
+      h: 'Tekst',
+      s: 'NLP på tekster/beskrivelser. Trekker opp: dop/våpen/trusler/plug/trap. Trekker ned: anti-dop/anti-vold, kritisk/ironisk kontekst.'
+    },
+    visual: {
+      h: 'Visuelt',
+      s: 'Deteksjon av symboler i cover/thumbnail. Trekker opp: våpenlignende objekter, balaclava, kontantbunker, statusbiler. Trekker ned: tydelig kunst/ironi/avstandstagen.'
+    },
+    audio: {
+      h: 'Lyd',
+      s: 'Spotify audio-features (svakt signal): kombinasjon av høy energy, lav valence og høy speechiness kan korrelere med hardt narrativ. Sier ikke noe direkte om kriminalitet.'
+    },
+    network: {
+      h: 'Nettverk',
+      s: 'Samarbeids-/feature-nettverk og spillelister. Trekker opp: tett kobling til profiler med høy innholdsrisiko. Trekker ned: variert nettverk og forebyggende samarbeid.'
+    },
+    metadata: {
+      h: 'Metadata',
+      s: 'Beskrivelser/hashtags/merch-tekst. Hyppig bruk av explicit/snabb cash-retorikk trekker opp. Vanligvis et svakt til middels signal.'
+    },
+    counter: {
+      h: 'Mot-signal',
+      s: 'Budskap som eksplisitt tar avstand fra dop/vold/rekruttering (f.eks. «ingen våpen», «si nei til dop»), eller tekster som problematiserer miljøet. Trekker scoren ned.'
+    },
+    updated: {
+      h: 'Oppdatert + notat',
+      s: 'Siste vurderingsdato og forklaring. Ferskt innhold vektes mer. Notatet gir kontekst til bruk i samtaler med foreldre/elever.'
+    },
+    pedagogikk: {
+      h: 'Slik bruker du kortet pedagogisk',
+      s: 'Snakk om faktorene, ikke personen: «Denne låten/profilen scorer høyt fordi teksten/symbolene normaliserer X/Y». Still tre spørsmål: 1) Hva gjør innholdet attraktivt for unge? 2) Hvilke konsekvenser skjules/glorifiseres? 3) Finnes det mot-budskap vi kan løfte frem? Se trend: øker scoren over tid → vurder forebyggende tiltak (klassetime, foreldremøte, helsesykepleier, SLT).'
+    },
+    ansvar: {
+      h: 'Viktig for ansvarlig bruk',
+      s: 'Scoren vurderer innhold – ikke lovbrudd eller individer. Ironi/kunst/fiksjon må vurderes manuelt. Bruk alltid menneskelig gjennomgang ved høy score før tiltak.'
+    }
+  };
+
+  // ------- TOOLTIP LOGIKK -------
+  const tooltip = document.getElementById('tooltip');
+  const ttH = document.getElementById('tt-h');
+  const ttS = document.getElementById('tt-s');
+  function showTip(key, x, y){
+    const d = HELP[key]; if(!d) return;
+    ttH.textContent = d.h; ttS.textContent = d.s;
+    tooltip.style.display = 'block';
+    const rect = tooltip.getBoundingClientRect();
+    const left = Math.min(x + 14, window.innerWidth - rect.width - 10);
+    const top = Math.min(y + 14, window.innerHeight - rect.height - 10);
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = top + 'px';
+    tooltip.setAttribute('aria-hidden','false');
+  }
+  function hideTip(){ tooltip.style.display = 'none'; tooltip.setAttribute('aria-hidden','true'); }
+  document.addEventListener('mouseover', (e)=>{
+    const t = e.target.closest('.info');
+    if(!t) return hideTip();
+    showTip(t.getAttribute('data-tipkey'), e.clientX, e.clientY);
+  });
+  document.addEventListener('mousemove', (e)=>{
+    if(tooltip.style.display==='block'){
+      const t = e.target.closest('.info'); if(!t) return;
+      showTip(t.getAttribute('data-tipkey'), e.clientX, e.clientY);
+    }
+  });
+  document.addEventListener('mouseout', (e)=>{
+    if(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.info')) return;
+    hideTip();
+  });
+  document.addEventListener('focusin', (e)=>{
+    const t = e.target.closest('.info'); if(!t) return;
+    const r = t.getBoundingClientRect(); showTip(t.getAttribute('data-tipkey'), r.right, r.bottom);
+  });
+  document.addEventListener('focusout', hideTip);
+
+  // ------- MOCKDATA (fiktive artister) -------
+  const ARTISTS = [
+    {
+      id:"a1", name:"Lina Vox", country:"NO", genre:"Pop", score:28,
+      plays: 120000, listeners: 45000,
+      factors:{lyrics:0.08, visual:0.06, audio:0.05, network:0.05, metadata:0.04, counter:0.10},
+      trend:[14,18,20,24,21,25,28],
+      terms:["fred","peace","ingen våpen","mot dop"],
+      badges:["Forebyggende budskap","Ung målgruppe"],
+      note:"Positive anti-signaler dominerer. Enkelte referanser til festkultur uten glorifisering.",
+      updated:"2025-08-10"
+    },
+    {
+      id:"a2", name:"Kilo Switch", country:"SE", genre:"Rap/Trap", score:82,
+      plays: 980000, listeners: 116029,
+      factors:{lyrics:0.65, visual:0.55, audio:0.32, network:0.40, metadata:0.20, counter:0.00},
+      trend:[60,66,70,74,79,81,82],
+      terms:["snabba cash","plug","glock","draco","balaclava"],
+      badges:["Explicit","Sterk visuell symbolikk"],
+      note:"Gjentatt glorifisering av dop/våpen og sterk symbolbruk i artwork. Tett samarbeid med lignende profiler.",
+      updated:"2025-08-11"
+    },
+    {
+      id:"a3", name:"Neon Harbor", country:"NO", genre:"EDM", score:47,
+      plays: 380000, listeners: 82000,
+      factors:{lyrics:0.18, visual:0.20, audio:0.22, network:0.10, metadata:0.05, counter:0.05},
+      trend:[30,33,37,42,45,44,47],
+      terms:["party","shots","cash"],
+      badges:["Klubb-orientert","Blandede signaler"],
+      note:"Festorientert estetikk; enkelte normaliserende uttrykk men uten eksplisitt vold/dop-glorifisering.",
+      updated:"2025-08-12"
+    },
+    {
+      id:"a4", name:"Rose Alley", country:"SE", genre:"R&B", score:35,
+      plays: 210000, listeners: 59000,
+      factors:{lyrics:0.12, visual:0.12, audio:0.10, network:0.12, metadata:0.05, counter:0.06},
+      trend:[20,24,28,30,31,33,35],
+      terms:["love","stay clean"],
+      badges:["Relasjons-tema","Noen anti-signaler"],
+      note:"Relasjonell tematikk med sporadiske referanser til økonomisk status.",
+      updated:"2025-08-09"
+    },
+    {
+      id:"a5", name:"Trap Fjord", country:"NO", genre:"Rap/Trap", score:76,
+      plays: 640000, listeners: 102000,
+      factors:{lyrics:0.55, visual:0.45, audio:0.28, network:0.22, metadata:0.18, counter:0.02},
+      trend:[52,58,61,67,70,73,76],
+      terms:["snø","stash","clip","mag"],
+      badges:["Høy frekvens risikouttrykk","Samarbeid med høyrisiko"],
+      note:"Økende intensitet i tekst og visuals det siste året. Svake mot-signaler.",
+      updated:"2025-08-12"
+    }
+  ];
+
+  // ------- UI HELPERS -------
+  const grid = document.getElementById('grid');
+  const count = document.getElementById('count');
+  const q = document.getElementById('q');
+  const genre = document.getElementById('genre');
+  const minScore = document.getElementById('minScore');
+
+  function bandColor(score){
+    if(score>=75) return 'var(--high)';
+    if(score>=55) return 'var(--mid)';
+    return 'var(--ok)';
+  }
+  function bandLabel(score){
+    if(score>=75) return 'Høy';
+    if(score>=55) return 'Middels';
+    return 'Lav';
+  }
+
+  function render(){
+    const query = (q.value||'').toLowerCase();
+    const g = genre.value;
+    const min = parseInt(minScore.value,10)||0;
+
+    const items = ARTISTS.filter(a=>
+      (!g || a.genre===g) &&
+      (a.score>=min) &&
+      (a.name.toLowerCase().includes(query) || a.terms.some(t=>t.toLowerCase().includes(query)))
+    );
+
+    count.textContent = `${items.length} av ${ARTISTS.length} artister vises`;
+
+    grid.innerHTML = items.map(a=>{
+      return `
+      <article class="card artist-card" tabindex="0" role="button" aria-label="Åpne ${a.name}" data-id="${a.id}">
+        <span class="tag">${a.country} • ${a.genre}<span class="info" data-tipkey="tag" tabindex="0" title="Land/region og sjanger">i</span></span>
+        <div class="score" style="border-color:${bandColor(a.score)}; box-shadow: inset 0 0 40px #0007, 0 0 0 2px ${bandColor(a.score)}22">
+          <div class="val">${Math.round(a.score)}</div>
+          <div class="band" style="color:${bandColor(a.score)}">${bandLabel(a.score)} <span class="info" data-tipkey="score" tabindex="0" title="Samlet rekrutteringsrisiko">i</span></div>
+        </div>
+        <div class="artist-info">
+          <h3>${a.name}</h3>
+          <div class="badges">
+            ${a.badges.map(b=>`<span class="badge">${b}</span>`).join('')}
+            <span class="info" data-tipkey="badges" tabindex="0" title="Forklaring på merkeinnhold">i</span>
+          </div>
+          <div class="kpi">
+            <span class="k">Tekst: ${(a.factors.lyrics*100)|0} <span class="info" data-tipkey="lyrics" tabindex="0" title="Hva betyr Tekst?">i</span></span>
+            <span class="k">Visuelt: ${(a.factors.visual*100)|0} <span class="info" data-tipkey="visual" tabindex="0" title="Hva betyr Visuelt?">i</span></span>
+            <span class="k">Lyd: ${(a.factors.audio*100)|0} <span class="info" data-tipkey="audio" tabindex="0" title="Hva betyr Lyd?">i</span></span>
+            <span class="k">Nettverk: ${(a.factors.network*100)|0} <span class="info" data-tipkey="network" tabindex="0" title="Hva betyr Nettverk?">i</span></span>
+            <span class="k">Metadata: ${(a.factors.metadata*100)|0} <span class="info" data-tipkey="metadata" tabindex="0" title="Hva betyr Metadata?">i</span></span>
+            <span class="k">Mot-signal: ${(a.factors.counter*100)|0} <span class="info" data-tipkey="counter" tabindex="0" title="Hva betyr Mot-signal?">i</span></span>
+          </div>
+          <p class="muted" style="margin:6px 0 0">Avspillinger: ${a.plays.toLocaleString()} • Månedlige lyttere: ${a.listeners.toLocaleString()}</p>
+          <p class="muted" style="margin:6px 0 0">Oppdatert: ${a.updated}. ${a.note} <span class="info" data-tipkey="updated" tabindex="0" title="Hva betyr Oppdatert + notat?">i</span></p>
+        </div>
+      </article>`
+    }).join('');
+
+    // attach click handlers
+    grid.querySelectorAll('[data-id]').forEach(el=>{
+      el.addEventListener('click', ()=> openModal(el.getAttribute('data-id')));
+      el.addEventListener('keypress', (e)=>{ if(e.key==='Enter') openModal(el.getAttribute('data-id')) });
+    });
+  }
+
+  q.addEventListener('input', render);
+  genre.addEventListener('change', render);
+  minScore.addEventListener('input', ()=>{ render(); });
+
+  // ------- MODAL / DETAILS -------
+  const modal = document.getElementById('modal');
+  const closeBtn = document.getElementById('closeBtn');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalSub = document.getElementById('modalSub');
+  const trendCanvas = document.getElementById('trend');
+  const factorsDiv = document.getElementById('factors');
+  const termsDiv = document.getElementById('terms');
+  const explainP = document.getElementById('explain');
+
+  function openModal(id){
+    const a = ARTISTS.find(x=>x.id===id);
+    if(!a) return;
+    modalTitle.textContent = a.name;
+    modalSub.textContent = `${a.country} • ${a.genre} • Score ${Math.round(a.score)} (${bandLabel(a.score)})`;
+    explainP.textContent = a.note + ' Scoren påvirkes mest av tekst og visuell symbolikk. Mot-signaler trekker ned der de finnes. Dette er en innholds-analyse, ikke en vurdering av person.';
+
+    // terms
+    termsDiv.innerHTML = a.terms.map(t=>`<span class="badge">${t}</span>`).join('') || '<span class="muted">Ingen registrerte uttrykk</span>';
+
+    // factors bars
+    const entries = [
+      ['Tekst', a.factors.lyrics],
+      ['Visuelt', a.factors.visual],
+      ['Lyd', a.factors.audio],
+      ['Nettverk', a.factors.network],
+      ['Metadata', a.factors.metadata],
+      ['Mot-signal', a.factors.counter]
+    ];
+    factorsDiv.innerHTML = entries.map(([k,v])=>{
+      const pct = Math.round((v||0)*100);
+      const col = k==='Mot-signal' ? 'var(--ok)' : (pct>=55? 'var(--high)' : pct>=35 ? 'var(--mid)' : 'var(--brand)');
+      return `<div class="bar"><div class="t">${k}</div>
+        <div style="margin-top:8px; width:100%; height:10px; background:#0a1220; border-radius:6px; overflow:hidden">
+          <div style="width:${pct}%; height:100%; background:${col}"></div>
+        </div>
+        <div class="muted" style="margin-top:6px">${pct} / 100</div></div>`
+    }).join('');
+
+    // trend chart (simple line)
+    drawTrend(trendCanvas, a.trend, bandColor(a.score));
+
+    modal.classList.add('open');
+  }
+
+  function drawTrend(canvas, values, color){
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.clientWidth, H = canvas.clientHeight;
+    canvas.width = W*dpr; canvas.height = H*dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    // bg grid
+    ctx.fillStyle = '#0b1220'; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle = '#223047'; ctx.lineWidth = 1;
+    for(let i=0;i<5;i++){ const y = (i+1)*H/6; ctx.beginPath(); ctx.moveTo(8,y); ctx.lineTo(W-8,y); ctx.stroke(); }
+    // line
+    const max = Math.max(...values, 100), min = Math.min(...values, 0);
+    const pad = 14;
+    ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.beginPath();
+    values.forEach((v,i)=>{
+      const x = pad + i*( (W-2*pad) / (values.length-1) );
+      const y = H - pad - ((v-min)/(max-min))*(H-2*pad);
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      // point
+      ctx.fillStyle = '#cbd5e1'; ctx.beginPath(); ctx.arc(x,y,2.5,0,Math.PI*2); ctx.fill();
+    });
+    ctx.stroke();
+  }
+
+  closeBtn.addEventListener('click', ()=> modal.classList.remove('open'));
+  modal.addEventListener('click', (e)=>{ if(e.target===modal) modal.classList.remove('open')});
+
+  // initial render
+  render();
+  </script>
+</body>
+</html>
