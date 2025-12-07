@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Risikomatrise – Misbruk av spillplattformer for kriminalitet og rekruttering</title>
+  <meta name="description" content="Oversikt over hvordan populære spill og plattformer kan misbrukes til kriminalitet og rekruttering – med kilder fra Europol, FBI, NSA, RAND m.fl." />
+  <!-- Tailwind brukes fortsatt for intern layout/spacing -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      /* Felles OpenDefender-variabler */
+      --bg:#0b1020;
+      --bg-elevated:#151a2b;
+      --accent:#3ba4ff;
+      --text-main:#f5f5f7;
+      --text-muted:#c3c7d6;
+      --border-soft:#22283a;
+      --radius-lg:18px;
+      --radius-md:12px;
+      --shadow-soft:0 18px 40px rgba(0,0,0,0.35);
+      --max-width:1200px;
+      --font-main:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font-family:var(--font-main);
+      background:radial-gradient(circle at top,#151b33 0,#050713 60%,#02030a 100%);
+      color:var(--text-main);
+      -webkit-font-smoothing:antialiased;
+    }
+
+    a{color:inherit;text-decoration:none;}
+
+    .page{
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* Header/nav – felles med resten av OpenDefender */
+    header{
+      position:sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter:blur(14px);
+      background:rgba(5,7,19,0.92);
+      border-bottom:1px solid rgba(255,255,255,0.04);
+    }
+    .nav{
+      max-width:var(--max-width);
+      margin:0 auto;
+      padding:0.6rem 1.4rem;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+    }
+    .nav-left{
+      display:flex;
+      align-items:center;
+      gap:0.7rem;
+    }
+    .logo-icon{
+      width:32px;
+      height:32px;
+      border-radius:999px;
+      background:radial-gradient(circle at 30% 20%,#81e6ff,#3b82f6 40%,#111827 100%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:0.9rem;
+      font-weight:700;
+      color:#020617;
+      box-shadow:0 0 0 2px rgba(59,130,246,0.5);
+    }
+    .logo-text-main{
+      font-weight:600;
+      letter-spacing:0.04em;
+      font-size:0.95rem;
+      text-transform:uppercase;
+    }
+    .logo-text-sub{
+      font-size:0.8rem;
+      color:var(--text-muted);
+    }
+    .nav-links{
+      display:flex;
+      align-items:center;
+      gap:0.6rem;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .nav-link{
+      padding:0.35rem 0.85rem;
+      border-radius:999px;
+      font-size:0.82rem;
+      color:var(--text-muted);
+      border:1px solid transparent;
+      background:transparent;
+    }
+    .nav-link:hover{
+      border-color:rgba(148,163,184,0.5);
+      background:rgba(15,23,42,0.8);
+      color:var(--text-main);
+    }
+    .nav-link-primary{
+      background:linear-gradient(120deg,#3ba4ff,#7dd3fc);
+      color:#020617;
+      border-color:transparent;
+      font-weight:600;
+      box-shadow:0 10px 25px rgba(59,164,255,0.35);
+    }
+
+    main{flex:1;}
+
+    .section{
+      max-width:var(--max-width);
+      margin:0 auto;
+      padding:2.2rem 1.4rem 2.6rem;
+    }
+    @media (max-width:900px){
+      .nav{padding-inline:1rem;}
+      .section{padding-inline:1rem;}
+    }
+
+    .eyebrow{
+      font-size:0.78rem;
+      text-transform:uppercase;
+      letter-spacing:0.16em;
+      color:var(--accent);
+      margin-bottom:0.4rem;
+    }
+    .section-title{
+      font-size:1.6rem;
+      margin-bottom:0.35rem;
+    }
+    .section-subtitle{
+      font-size:0.9rem;
+      color:var(--text-muted);
+      max-width:46rem;
+      margin-bottom:1.2rem;
+    }
+
+    /* Footer – felles med andre sider */
+    footer{
+      border-top:1px solid rgba(15,23,42,0.9);
+      background:#020617;
+      padding:1.4rem 1.4rem 1.8rem;
+      margin-top:1.8rem;
+    }
+    .footer-inner{
+      max-width:var(--max-width);
+      margin:0 auto;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:1rem;
+      flex-wrap:wrap;
+      font-size:0.8rem;
+      color:var(--text-muted);
+    }
+    .back-link{
+      padding:0.35rem 0.8rem;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,0.55);
+      background:rgba(15,23,42,0.95);
+      color:var(--text-muted);
+      font-size:0.78rem;
+    }
+    .back-link:hover{color:var(--text-main);}
+
+    /* Hero-kort / paneler */
+    .panel{
+      border-radius:1.5rem;
+      background:#0f172a;
+      border:1px solid var(--border-soft);
+      box-shadow:var(--shadow-soft);
+    }
+
+    /* Scrollbar (lys) */
+    ::-webkit-scrollbar{height:10px;width:10px}
+    ::-webkit-scrollbar-thumb{border-radius:8px;background:#cbd5e1}
+    ::-webkit-scrollbar-track{background:#f1f5f9}
+
+    /* Lenker i kildelisten – bruk OpenDefender-aksent */
+    .link{
+      color:var(--accent);
+      text-decoration:underline;
+      text-decoration-thickness:1px;
+      text-underline-offset:3px;
+    }
+    .link:hover{text-decoration:none}
+  </style>
+</head>
+<body>
+<div class="page">
+  <!-- Felles OpenDefender-header -->
+  <header aria-label="Toppmeny">
+    <nav class="nav" aria-label="Hovedmeny">
+      <div class="nav-left">
+        <div class="logo-icon">OD</div>
+        <div>
+          <div class="logo-text-main">OpenDefender</div>
+          <div class="logo-text-sub">SnapThreatMap</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a class="nav-link" href="index.html#about">Hva er dette?</a>
+        <a class="nav-link" href="kart.html">Trusselkart</a>
+        <a class="nav-link" href="varsle.html">Varsle anonymt</a>
+        <a class="nav-link" href="om.html">Om prosjektet</a>
+        <a class="nav-link-primary" href="moduler.html">Moduler</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Hero + toppknapper -->
+    <section class="section">
+      <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
+        <div>
+          <div class="eyebrow">Fagmodul · Spillplattformer</div>
+          <h1 class="section-title">Risikomatrise: misbruk av spillplattformer</h1>
+          <p class="section-subtitle">
+            Spill i seg selv er ikke problemet – men plattformene rundt kan misbrukes. Denne modulen
+            gir en strukturert oversikt over hvordan populære spill og plattformer kan utnyttes til
+            rekruttering, grooming, økonomisk utnyttelse og skadelig kommunikasjon, basert på åpne
+            kilder fra Europol, FBI, RAND m.fl.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button id="printBtn" class="px-3 py-2 rounded-xl border bg-white/90 hover:bg-slate-50 text-sm text-slate-900">
+            Skriv ut / Lagre som PDF
+          </button>
+          <a href="#kilder" class="px-3 py-2 rounded-xl bg-slate-900 text-white text-sm hover:bg-slate-800">
+            Gå til kilder
+          </a>
+        </div>
+      </div>
+
+      <!-- Hero-innhold -->
+      <div class="grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          <h2 class="text-2xl md:text-3xl font-bold mb-3 text-slate-50">
+            Spill ≠ kriminalitet. <span class="text-slate-400">Men plattformer kan misbrukes.</span>
+          </h2>
+          <p class="text-slate-300 leading-relaxed">
+            Denne siden samler en <strong>praktisk risikomatrise</strong> og en
+            <strong>kurert oversikt</strong> over hvordan populære spill og tilknyttede plattformer kan
+            misbrukes for <em>rekruttering</em>, <em>økonomisk utnyttelse</em> og
+            <em>skadelig kommunikasjon</em>. Innholdet bygger på åpne kilder fra
+            <strong>Europol, FBI, NSA, RAND</strong> m.fl. Se kildelisten nederst.
+          </p>
+          <ul class="mt-4 text-slate-300 list-disc pl-5 space-y-1">
+            <li><strong>Hovedpoeng:</strong> Risikoen knytter seg primært til <em>chat/voice</em>, <em>økonomi/skins</em>, <em>mods/privat-servere</em> og <em>ung målgruppe</em>.</li>
+            <li><strong>Mål:</strong> Hjelpe skoler, foresatte og CERT-miljøer med å identifisere <em>hvor</em> og <em>hvordan</em> tiltak bør rettes.</li>
+          </ul>
+        </div>
+        <div class="p-5 rounded-3xl border bg-white/95 shadow-sm panel">
+          <div class="grid grid-cols-3 gap-4 text-center">
+            <div class="p-4 rounded-2xl bg-red-50/90">
+              <div class="text-2xl font-semibold text-red-700">4</div>
+              <div class="text-sm text-slate-700">Høy risiko</div>
+            </div>
+            <div class="p-4 rounded-2xl bg-amber-50/90">
+              <div class="text-2xl font-semibold text-amber-700">3</div>
+              <div class="text-sm text-slate-700">Moderat risiko</div>
+            </div>
+            <div class="p-4 rounded-2xl bg-emerald-50/90">
+              <div class="text-2xl font-semibold text-emerald-700">1</div>
+              <div class="text-sm text-slate-700">Lav/moderat</div>
+            </div>
+          </div>
+          <p class="mt-4 text-xs text-slate-500">
+            * Risiko er en <em>kontekstuell vurdering</em> av misbruksflaten – ikke en dom over spillet i seg selv.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filtre -->
+    <section class="section pt-0">
+      <div class="rounded-3xl border bg-white/95 p-4 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-end gap-3">
+          <div class="flex-1">
+            <label class="text-sm font-medium text-slate-700">Søk</label>
+            <input
+              id="search"
+              type="text"
+              placeholder="Søk etter spill/plattform eller misbruk (f.eks. 'grooming', 'skins')"
+              class="w-full mt-1 rounded-xl border-slate-300 focus:border-slate-400 focus:ring-slate-400 text-slate-900"
+            />
+          </div>
+          <div>
+            <label class="text-sm font-medium text-slate-700">Risikonivå</label>
+            <div class="mt-1 flex flex-wrap gap-2" id="riskFilters">
+              <button data-risk="Alle" class="chip active">Alle</button>
+              <button data-risk="Høy" class="chip">Høy</button>
+              <button data-risk="Moderat" class="chip">Moderat</button>
+              <button data-risk="Lav/moderat" class="chip">Lav/moderat</button>
+            </div>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-slate-700">Type</label>
+            <div class="mt-1 flex flex-wrap gap-2" id="typeFilters">
+              <button data-type="Alle" class="chip active">Alle</button>
+              <button data-type="Spill" class="chip">Spill</button>
+              <button data-type="Plattform" class="chip">Plattform</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Risikomatrise (tabell) -->
+    <section class="section pt-6 pb-4">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-xl font-semibold">Risikomatrise (internasjonal)</h3>
+        <span class="text-sm text-slate-400">Sorter ved å klikke på kolonneoverskrift</span>
+      </div>
+      <div class="overflow-auto rounded-2xl border bg-white/95 shadow-sm">
+        <table class="min-w-full text-sm text-slate-900" id="riskTable">
+          <thead class="bg-slate-50">
+            <tr>
+              <th class="text-left px-4 py-3 font-medium">Spill / Plattform</th>
+              <th class="text-left px-4 py-3 font-medium">Type</th>
+              <th class="text-left px-4 py-3 font-medium">Typisk misbruk</th>
+              <th class="text-left px-4 py-3 font-medium">Målgruppe</th>
+              <th class="text-left px-4 py-3 font-medium">Risiko</th>
+              <th class="text-left px-4 py-3 font-medium">Kilder</th>
+            </tr>
+          </thead>
+          <tbody id="riskTbody" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Kortvisning -->
+    <section class="section pt-2 pb-6">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-xl font-semibold">Detaljkort – internasjonal</h3>
+        <div class="text-sm text-slate-400">Klikk på «Kilder» for å lese mer</div>
+      </div>
+      <div id="cardGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </section>
+
+    <!-- Norsk risikomatrise -->
+    <section class="section pt-2 pb-10">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-xl font-semibold">Norsk risikomatrise</h3>
+        <span class="text-sm text-slate-400">Kilder fra Kripos, PST, NRK, Medietilsynet m.fl.</span>
+      </div>
+      <div class="overflow-auto rounded-2xl border bg-white/95 shadow-sm mb-6">
+        <table class="min-w-full text-sm text-slate-900" id="riskTableNO">
+          <thead class="bg-slate-50">
+            <tr>
+              <th class="text-left px-4 py-3 font-medium">Spill / Plattform</th>
+              <th class="text-left px-4 py-3 font-medium">Type</th>
+              <th class="text-left px-4 py-3 font-medium">Typisk misbruk (NO)</th>
+              <th class="text-left px-4 py-3 font-medium">Målgruppe (NO)</th>
+              <th class="text-left px-4 py-3 font-medium">Risiko</th>
+              <th class="text-left px-4 py-3 font-medium">Kilder (NO)</th>
+            </tr>
+          </thead>
+          <tbody id="riskTbodyNO" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-semibold">Detaljkort – Norge</h3>
+        <div class="text-sm text-slate-400">Klikk på «Kilder» for å lese mer</div>
+      </div>
+      <div id="cardGridNO" class="grid md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </section>
+
+    <!-- Kilder -->
+    <section id="kilder" class="bg-white border-t border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 py-10 text-slate-900">
+        <h3 class="text-xl font-semibold mb-3">Kildeliste (utvalg)</h3>
+        <p class="text-slate-700 mb-4">
+          Offisielle og anerkjente kilder om misbruk av digitale plattformer, ekstremisme, grooming og relaterte trusler:
+        </p>
+        <div class="grid md:grid-cols-2 gap-6">
+          <ul class="list-disc pl-5 space-y-2 text-slate-800">
+            <li><a class="link" href="https://www.europol.europa.eu/publications-events/main-reports/tesat-report" target="_blank" rel="noopener">Europol – EU Terrorism Situation & Trend Report (TE-SAT) – oversiktsside</a></li>
+            <li><a class="link" href="https://www.europol.europa.eu/cms/sites/default/files/documents/TE-SAT%202024.pdf" target="_blank" rel="noopener">Europol – TE-SAT 2024 (PDF)</a></li>
+            <li><a class="link" href="https://www.europol.europa.eu/media-press/newsroom/news/europol-coordinates-operation-against-terrorist-content-online-targeting-minors" target="_blank" rel="noopener">Europol – Aksjonsdag mot terrorpropaganda rettet mot mindreårige</a></li>
+            <li><a class="link" href="https://www.europol.europa.eu/media-press/newsroom/news/europol-warns-of-organised-crime-networks-recruiting-minors-for-criminal-acts" target="_blank" rel="noopener">Europol – Organiserte kriminelle rekrutterer mindreårige</a></li>
+            <li><a class="link" href="https://www.europol.europa.eu/publication-events/main-reports/internet-organised-crime-threat-assessment-iocta-2024" target="_blank" rel="noopener">Europol – IOCTA 2024</a></li>
+          </ul>
+          <ul class="list-disc pl-5 space-y-2 text-slate-800">
+            <li><a class="link" href="https://www.fbi.gov/video-repository/its-not-a-game-psa-fbi-new-york-062921.mp4/view" target="_blank" rel="noopener">FBI – «It’s Not a Game» (PSA om rovdyr i online-spill)</a></li>
+            <li><a class="link" href="https://www.fbi.gov/how-we-can-help-you/outreach/safe-online-surfing-sos-program" target="_blank" rel="noopener">FBI – Safe Online Surfing (SOS) – elev/foreldre-ressurser</a></li>
+            <li><a class="link" href="https://www.fbi.gov/contact-us/field-offices/jacksonville/news/staying-one-step-ahead-how-to-protect-kids-from-emerging-online-threats" target="_blank" rel="noopener">FBI – Beskytt barn mot nye nett-trusler</a></li>
+            <li><a class="link" href="https://www.propublica.org/article/world-of-spycraft-intelligence-agencies-spied-in-online-games" target="_blank" rel="noopener">ProPublica – «World of Spycraft» (NSA/CIA overvåking av spillverdener)</a></li>
+            <li><a class="link" href="https://www.documentcloud.org/documents/889134-games/" target="_blank" rel="noopener">Snowden-dokumenter (DocumentCloud) – spill og virtuelle verdener</a></li>
+          </ul>
+          <ul class="list-disc pl-5 space-y-2 text-slate-800">
+            <li><a class="link" href="https://www.rand.org/pubs/research_reports/RRA2773-1.html" target="_blank" rel="noopener">RAND – Countering Violent Extremism Online (2023)</a></li>
+            <li><a class="link" href="https://www.justsecurity.org/wp-content/uploads/2023/05/RAND_CTA1458-1-1.pdf" target="_blank" rel="noopener">RAND – Extremist Use of Online Spaces (2022, PDF)</a></li>
+            <li><a class="link" href="https://home-affairs.ec.europa.eu/system/files/2021-08/ran_extremists_use_gaming_platforms_082021_en.pdf" target="_blank" rel="noopener">EU RAN – Extremists’ use of gaming (adjacent) platforms (PDF)</a></li>
+            <li><a class="link" href="https://home-affairs.ec.europa.eu/system/files/2022-02/EUIF%20Technical%20Meeting%20on%20Video%20Gaming%20October%202021%20RAN%20Policy%20Support%20paper_en.pdf" target="_blank" rel="noopener">EU RAN – Video Gaming & (Violent) Extremism (PDF)</a></li>
+          </ul>
+          <ul class="list-disc pl-5 space-y-2 text-slate-800">
+            <li><a class="link" href="https://www.nspcc.org.uk/keeping-children-safe/online-safety/online-games/" target="_blank" rel="noopener">NSPCC – Risikoer ved online-spill (foreldreveiledning)</a></li>
+            <li><a class="link" href="https://www.gamblingcommission.gov.uk/report/young-people-and-gambling-2023/ypg-2023-online-gambling-awareness-and-use-of-in-game-items-in-video-games" target="_blank" rel="noopener">UK Gambling Commission – In-game items & unge (2023)</a></li>
+            <li><a class="link" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8987422/" target="_blank" rel="noopener">Akademisk – «Skin gambling» og unge (åpen tilgang)</a></li>
+          </ul>
+        </div>
+        <div class="grid md:grid-cols-2 gap-6 mt-6">
+          <ul class="list-disc pl-5 space-y-2 text-slate-800">
+            <li><a class="link" href="https://www.politiet.no/globalassets/04-aktuelt-tall-og-fakta/kripos/trender-i-kriminaliteten/trender-i-kriminaliteten-2023.pdf" target="_blank" rel="noopener">Kripos – Trender i kriminaliteten 2023 (PDF)</a></li>
+            <li><a class="link" href="https://www.pst.no/alle-artikler/trusselvurderinger/nasjonal-trusselvurdering-2024/" target="_blank" rel="noopener">PST – Nasjonal trusselvurdering 2024</a></li>
+          </ul>
+          <ul class="list-disc pl-5 space-y-2 text-slate-800">
+            <li><a class="link" href="https://www.nrk.no/norge/politiet-advarer-mot-at-unge-rekrutteres-til-kriminalitet-via-nettspill-1.15987639" target="_blank" rel="noopener">NRK – Politiet advarer: unge rekrutteres via nettspill</a></li>
+            <li><a class="link" href="https://www.medietilsynet.no/globalassets/publikasjoner/ungdom-og-dataspill/ungdom-og-dataspill-2022.pdf" target="_blank" rel="noopener">Medietilsynet – Ungdom og dataspill 2022 (PDF)</a></li>
+          </ul>
+        </div>
+        <p class="mt-6 text-xs text-slate-500">
+          Ansvarsfraskrivelse: Listen peker på <em>misbruksmuligheter</em>, ikke påstander om at spill/publishere fremmer kriminalitet eller ekstremisme.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div>
+        © <span id="year"></span> OpenDefender / SnapThreatMap – modul:
+        <span class="whitespace-nowrap">Risikomatrise for spillplattformer (demo).</span>
+        Innholdet er kuratert for forebygging og faglig dialog, ikke for å merke enkeltspillere.
+      </div>
+      <a href="moduler.html" class="back-link">Tilbake til moduler</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+  // UI helpers
+  const chipsBase = 'chip px-3 py-1.5 rounded-full border text-sm bg-white hover:bg-slate-50';
+  document.querySelectorAll('.chip').forEach(btn=>{ btn.className = chipsBase + ' text-slate-700'; });
+  document.querySelectorAll('.chip.active').forEach(btn=>{ btn.className = chipsBase + ' bg-slate-900 text-white border-slate-900'; });
+
+  const YEAR = new Date().getFullYear();
+  document.getElementById('year').textContent = YEAR;
+  const printBtn = document.getElementById('printBtn');
+  if (printBtn) {
+    printBtn.addEventListener('click', ()=>window.print());
+  }
+
+  // Datasett (kurert)
+  const data = [
+    {
+      name: 'Fortnite', type: 'Spill',
+      misuse: ['Rekruttering via voice-chat', 'Utnyttelse av barn/unge', 'Kjøp/handel av valuta (V-Bucks)'],
+      audience: 'Barn/unge 10–18 år', risk: 'Høy',
+      sources: [
+        {label: 'Europol – rekruttering av mindreårige', url: 'https://www.europol.europa.eu/media-press/newsroom/news/europol-warns-of-organised-crime-networks-recruiting-minors-for-criminal-acts'},
+        {label: 'FBI – Beskytt barn mot nye nett-trusler', url: 'https://www.fbi.gov/contact-us/field-offices/jacksonville/news/staying-one-step-ahead-how-to-protect-kids-from-emerging-online-threats'}
+      ]
+    },
+    {
+      name: 'Minecraft', type: 'Spill',
+      misuse: ['Propaganda på private servere', 'Skjult kommunikasjon', 'Modifikasjoner som bærer skadelig innhold'],
+      audience: 'Barn/unge 8–16 år', risk: 'Høy',
+      sources: [
+        {label: 'EU RAN – Extremists’ use of gaming platforms', url: 'https://home-affairs.ec.europa.eu/system/files/2021-08/ran_extremists_use_gaming_platforms_082021_en.pdf'},
+        {label: 'Europol – aksjonsdag mot propaganda mot mindreårige', url: 'https://www.europol.europa.eu/media-press/newsroom/news/europol-coordinates-operation-against-terrorist-content-online-targeting-minors'}
+      ]
+    },
+    {
+      name: 'Roblox', type: 'Spill',
+      misuse: ['Grooming via brukerlagde spill', 'Utnyttelse gjennom privat chat', 'Flytting til mindre modererte kanaler'],
+      audience: 'Barn 7–14 år', risk: 'Høy',
+      sources: [
+        {label: 'NSPCC – Online games (foreldreveiledning)', url: 'https://www.nspcc.org.uk/keeping-children-safe/online-safety/online-games/'},
+        {label: 'Europol – rekruttering av mindreårige', url: 'https://www.europol.europa.eu/media-press/newsroom/news/europol-warns-of-organised-crime-networks-recruiting-minors-for-criminal-acts'}
+      ]
+    },
+    {
+      name: 'Discord', type: 'Plattform',
+      misuse: ['Grooming og rekruttering', 'Deling av ekstremistisk innhold', 'Flytting fra spillchat til lukkede rom'],
+      audience: 'Særlig 12–25 år', risk: 'Høy',
+      sources: [
+        {label: 'EU RAN – Extremists’ use of gaming (adjacent) platforms', url: 'https://home-affairs.ec.europa.eu/system/files/2021-08/ran_extremists_use_gaming_platforms_082021_en.pdf'},
+        {label: 'FBI – It’s Not a Game (PSA)', url: 'https://www.fbi.gov/video-repository/its-not-a-game-psa-fbi-new-york-062921.mp4/view'}
+      ]
+    },
+    {
+      name: 'GTA Online', type: 'Spill',
+      misuse: ['Roleplay-miljøer som normaliserer kriminell atferd', 'Utnyttelse av in-game økonomi'],
+      audience: 'Unge voksne 15–30 år', risk: 'Moderat',
+      sources: [
+        {label: 'RAND – Countering Violent Extremism Online', url: 'https://www.rand.org/pubs/research_reports/RRA2773-1.html'}
+      ]
+    },
+    {
+      name: 'Call of Duty / Warzone', type: 'Spill',
+      misuse: ['Private lobbyer og voice for kontakt', 'Militarisert narrativ brukes i rekruttering'],
+      audience: 'Tenåringer/unge voksne 15–25 år', risk: 'Moderat',
+      sources: [
+        {label: 'RAND – Extremist Use of Online Spaces (PDF)', url: 'https://www.justsecurity.org/wp-content/uploads/2023/05/RAND_CTA1458-1-1.pdf'}
+      ]
+    },
+    {
+      name: 'CS:GO / Counter-Strike 2', type: 'Spill',
+      misuse: ['Skin-økonomi misbrukes til gambling/hvitvasking', 'Rekruttering i subkulturer'],
+      audience: '13–25 år', risk: 'Moderat',
+      sources: [
+        {label: 'UK Gambling Commission – unge & in-game items', url: 'https://www.gamblingcommission.gov.uk/report/young-people-and-gambling-2023/ypg-2023-online-gambling-awareness-and-use-of-in-game-items-in-video-games'},
+        {label: 'Akademisk – «Skin gambling» (PMC)', url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC8987422/'}
+      ]
+    },
+    {
+      name: 'World of Warcraft', type: 'Spill',
+      misuse: ['Historisk bruk av guilds/raid til skjult kommunikasjon'],
+      audience: 'Voksne 20–40 år (historisk)', risk: 'Lav/moderat',
+      sources: [
+        {label: 'ProPublica – World of Spycraft', url: 'https://www.propublica.org/article/world-of-spycraft-intelligence-agencies-spied-in-online-games'},
+        {label: 'Snowden-dokumenter – spill/virtuelle verdener', url: 'https://www.documentcloud.org/documents/889134-games/'}
+      ]
+    }
+  ];
+
+  // Norsk datasett
+  const noData = [
+    {
+      name: 'Fortnite / Roblox / Minecraft', type: 'Spill',
+      misuse: ['Grooming og uønsket kontakt', 'Flytting til private kanaler (Snap/Discord)', 'Manipulering/press for deling av materiale'],
+      audience: 'Barn/unge i Norge', risk: 'Høy',
+      sources: [
+        {label: 'Kripos – Trender i kriminaliteten 2023 (PDF)', url: 'https://www.politiet.no/globalassets/04-aktuelt-tall-og-fakta/kripos/trender-i-kriminaliteten/trender-i-kriminaliteten-2023.pdf'}
+      ]
+    },
+    {
+      name: 'Discord / GTA RP-servere', type: 'Plattform',
+      misuse: ['Samlingsplasser for ungdomsgjenger', 'Normalisering av vold/kriminalitet', 'Rekruttering'],
+      audience: 'Ungdom i norske byer', risk: 'Moderat',
+      sources: [
+        {label: 'NRK – Rekruttering via nettspill', url: 'https://www.nrk.no/norge/politiet-advarer-mot-at-unge-rekrutteres-til-kriminalitet-via-nettspill-1.15987639'}
+      ]
+    },
+    {
+      name: 'Spill/Chat generelt', type: 'Plattform',
+      misuse: ['Kontaktflate for høyreekstreme miljøer', 'Påvirkning/radikalisering av unge'],
+      audience: 'Tenåringer/unge menn', risk: 'Moderat',
+      sources: [
+        {label: 'PST – Nasjonal trusselvurdering 2024', url: 'https://www.pst.no/alle-artikler/trusselvurderinger/nasjonal-trusselvurdering-2024/'}
+      ]
+    },
+    {
+      name: 'CS:GO / Counter-Strike 2', type: 'Spill',
+      misuse: ['Skin gambling', 'Økonomisk utnyttelse/hvitvasking'],
+      audience: 'Norske ungdommer', risk: 'Moderat',
+      sources: [
+        {label: 'Medietilsynet – Ungdom og dataspill 2022 (PDF)', url: 'https://www.medietilsynet.no/globalassets/publikasjoner/ungdom-og-dataspill/ungdom-og-dataspill-2022.pdf'}
+      ]
+    }
+  ];
+
+  const tbody = document.getElementById('riskTbody');
+  const grid = document.getElementById('cardGrid');
+  const tbodyNO = document.getElementById('riskTbodyNO');
+  const gridNO = document.getElementById('cardGridNO');
+
+  function riskBadge(level){
+    const map = {
+      'Høy': 'bg-red-100 text-red-700 border-red-200',
+      'Moderat': 'bg-amber-100 text-amber-800 border-amber-200',
+      'Lav/moderat': 'bg-emerald-100 text-emerald-700 border-emerald-200'
+    };
+    return `<span class="inline-flex items-center px-2.5 py-1 rounded-full border text-xs font-medium ${map[level]||'bg-slate-100 text-slate-700 border-slate-200'}">${level}</span>`;
+  }
+
+  function makeLinks(srcs){
+    return srcs.map(s=>`<a class=\"underline decoration-dotted hover:no-underline\" href=\"${s.url}\" target=\"_blank\" rel=\"noopener\">${s.label}</a>`).join('<span class="text-slate-300"> • </span>');
+  }
+
+  function rowHTML(item){
+    return `<tr>
+      <td class="px-4 py-3 font-medium">${item.name}</td>
+      <td class="px-4 py-3">${item.type}</td>
+      <td class="px-4 py-3 text-slate-700">${item.misuse.join(', ')}</td>
+      <td class="px-4 py-3">${item.audience}</td>
+      <td class="px-4 py-3">${riskBadge(item.risk)}</td>
+      <td class="px-4 py-3">${makeLinks(item.sources)}</td>
+    </tr>`;
+  }
+
+  function cardHTML(item){
+    return `<article class="rounded-2xl border bg-white/95 shadow-sm p-5 flex flex-col gap-3">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h4 class="text-lg font-semibold text-slate-900">${item.name}</h4>
+          <p class="text-sm text-slate-600">${item.type} • Målgruppe: ${item.audience}</p>
+        </div>
+        ${riskBadge(item.risk)}
+      </div>
+      <ul class="text-slate-700 list-disc pl-5 space-y-1">
+        ${item.misuse.map(m=>`<li>${m}</li>`).join('')}
+      </ul>
+      <div class="mt-1 text-sm">Kilder: ${makeLinks(item.sources)}</div>
+      <div class="mt-2 text-xs text-slate-500">
+        Merk: Risikovurderingen gjelder <em>misbrukspotensial</em> (chat, økonomi, servere), ikke at spillet/publisheren fremmer kriminalitet.
+      </div>
+    </article>`;
+  }
+
+  function render(items){
+    tbody.innerHTML = items.map(rowHTML).join('');
+    grid.innerHTML = items.map(cardHTML).join('');
+  }
+  function renderNO(items){
+    tbodyNO.innerHTML = items.map(rowHTML).join('');
+    gridNO.innerHTML = items.map(cardHTML).join('');
+  }
+
+  render(data);
+  renderNO(noData);
+
+  // Sortering internasjonal
+  const ths = document.querySelectorAll('#riskTable thead th');
+  let sortKey = null, sortAsc = true;
+  ths.forEach((th, idx)=>{
+    th.style.cursor = 'pointer';
+    th.addEventListener('click', ()=>{
+      sortKey = ['name','type','misuse','audience','risk','sources'][idx];
+      sortAsc = !sortAsc;
+      const copy = [...filtered()];
+      copy.sort((a,b)=>{
+        const A = (sortKey==='misuse'?a.misuse.join(', '):sortKey==='sources'?a.sources.map(s=>s.label).join(', '):a[sortKey]||'').toLowerCase();
+        const B = (sortKey==='misuse'?b.misuse.join(', '):sortKey==='sources'?b.sources.map(s=>b.label).join(', '):b[sortKey]||'').toLowerCase();
+        return sortAsc ? A.localeCompare(B) : B.localeCompare(A);
+      });
+      render(copy);
+    });
+  });
+
+  // Sortering norsk
+  const thsNO = document.querySelectorAll('#riskTableNO thead th');
+  let sortKeyNO = null, sortAscNO = true;
+  thsNO.forEach((th, idx)=>{
+    th.style.cursor = 'pointer';
+    th.addEventListener('click', ()=>{
+      sortKeyNO = ['name','type','misuse','audience','risk','sources'][idx];
+      sortAscNO = !sortAscNO;
+      const copy = [...noData];
+      copy.sort((a,b)=>{
+        const A = (sortKeyNO==='misuse'?a.misuse.join(', '):sortKeyNO==='sources'?a.sources.map(s=>s.label).join(', '):a[sortKeyNO]||'').toLowerCase();
+        const B = (sortKeyNO==='misuse'?b.misuse.join(', '):sortKeyNO==='sources'?b.sources.map(s=>s.label).join(', '):b[sortKeyNO]||'').toLowerCase();
+        return sortAscNO ? A.localeCompare(B) : B.localeCompare(A);
+      });
+      renderNO(copy);
+    });
+  });
+
+  const search = document.getElementById('search');
+  const riskFilters = document.getElementById('riskFilters');
+  const typeFilters = document.getElementById('typeFilters');
+
+  let currentRisk = 'Alle';
+  let currentType = 'Alle';
+
+  function setActive(container, value){
+    container.querySelectorAll('button').forEach(btn=>{
+      const active = (btn.dataset.risk||btn.dataset.type) === value;
+      btn.className = chipsBase + (active ? ' bg-slate-900 text-white border-slate-900' : ' text-slate-700');
+    });
+  }
+
+  function filtered(){
+    const q = (search.value||'').trim().toLowerCase();
+    return data.filter(item=>{
+      const riskOk = currentRisk === 'Alle' || item.risk === currentRisk;
+      const typeOk = currentType === 'Alle' || item.type === currentType;
+      const text = [item.name, item.type, item.audience, item.risk, ...item.misuse].join(' ').toLowerCase();
+      return riskOk && typeOk && text.includes(q);
+    });
+  }
+
+  function update(){ render(filtered()); }
+
+  search.addEventListener('input', update);
+  riskFilters.addEventListener('click', (e)=>{
+    const b = e.target.closest('button');
+    if(!b) return;
+    currentRisk = b.dataset.risk; setActive(riskFilters, currentRisk); update();
+  });
+  typeFilters.addEventListener('click', (e)=>{
+    const b = e.target.closest('button');
+    if(!b) return;
+    currentType = b.dataset.type; setActive(typeFilters, currentType); update();
+  });
+</script>
+</body>
+</html>
