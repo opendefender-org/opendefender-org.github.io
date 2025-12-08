@@ -69,13 +69,22 @@ Verktøyet:
 
 ## Prosjektstruktur
 
+Dette repoet inneholder alle statiske sider for OpenDefender / SnapThreatMap-plattformen.
+
 | Fil | Beskrivelse |
 |-----|-------------|
-| **index.html** | Landingsside – trygg introduksjon til prosjektet |
-| **kart.html** | Trusselkart (syntetisk demo med Leaflet) |
-| **varsle.html** | Anonym og trygg varslingsside |
-| **om.html** | Formål, etikk, rammeverk, mål og prinsipper |
-| **pilot.html** | Fullt pilotdashboard med kart, filtrering, tidslinjer, tiltak og DIPD-demo |
+| **index.html** | Landingsside – trygg og kortfattet introduksjon til prosjektet. |
+| **kart.html** | Interaktivt trusselkart (syntetisk demo med Leaflet). Viser anonyme risikosoner. |
+| **varsle.html** | Anonym og sikker varslingsside for bekymringsmeldinger. |
+| **om.html** | Formål, etikk, rammeverk, mål, metoder og prinsipper for OpenDefender. |
+| **pilot.html** | Fullt pilotdashboard med kart, filtrering, demo-tidslinjer, indikatorer og DIPD-illustrasjon. |
+| **moduler.html** | Oversikt over alle fagmoduler og demonstratorer i prosjektet (spesielt for kommuner og skoler). |
+| **gaming-risk-matrix.html** | Fagmodul: Risikomatrise for misbruk av spillplattformer (internasjonal + norsk). |
+| **music-risk-matrix.html** | Fagmodul: Pedagogisk risikovurdering av musikkinnhold (fiktive artister, rekrutterings-tema). |
+| **LICENSE** | Apache 2.0-lisens for prosjektet. |
+| **README.md** | Dokumentasjon, struktur, formål og instruksjoner for bruk. |
+
+
 
 ---
 
