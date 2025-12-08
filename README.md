@@ -184,6 +184,6 @@ Pull requests er velkommen.
 
 For henvendelser om samarbeid, faglige spørsmål eller utvikling i kommune/skole/politi:
 
-**E-post:** opendefender@proton.me
+**E-post:** opendefender[et]proton[dot]me
 
 Henvendelser behandles av prosjektteamet og ikke av enkeltpersoner.
