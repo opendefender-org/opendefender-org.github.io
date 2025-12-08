@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sociograf – gaming og kriminalitetsnarrativer | OpenDefender SnapThreatMap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+    name="description"
+    content="Sociograf-modulen viser hvordan åpne samtaler om «crime RP» og lignende digitale miljøer på tvers av plattformer kan modelleres som en kunnskapsgraf med fokus på forebygging."
+  />
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-elevated: #151a2b;
+      --accent: #3ba4ff;
+      --accent-soft: rgba(59, 164, 255, 0.1);
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-subtle: rgba(148, 163, 184, 0.35);
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.82);
+      --radius-md: 0.75rem;
+      --radius-lg: 1.1rem;
+      --radius-pill: 999px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top, #111827 0, #020617 55%);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .page {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 1.6rem 1.2rem 2.4rem;
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        padding: 1.2rem 1rem 2.2rem;
+      }
+    }
+
+    /* Nav */
+
+    header {
+      margin-bottom: 1.8rem;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.7rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: radial-gradient(circle at top left, #111827 0, #020617 60%);
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.85);
+      position: sticky;
+      top: 0.6rem;
+      z-index: 10;
+      backdrop-filter: blur(14px);
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 18px;
+      background: radial-gradient(circle at 30% 0, #60a5fa 0, #1d4ed8 55%, #020617 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logo-orbit {
+      width: 72%;
+      height: 72%;
+      border-radius: 999px;
+      border: 1px solid rgba(191, 219, 254, 0.85);
+      position: relative;
+    }
+
+    .logo-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #facc15;
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.9);
+    }
+
+    .logo-text-main {
+      font-size: 0.92rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .logo-text-sub {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .logo-text-wrapper {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.65rem;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    .nav-link,
+    .nav-link-primary {
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+    }
+
+    .nav-link:hover {
+      border-color: rgba(148, 163, 184, 0.5);
+      color: var(--text-main);
+      text-decoration: none;
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .nav-link-primary {
+      border-color: rgba(59, 164, 255, 0.6);
+      background: radial-gradient(circle at top, rgba(59, 164, 255, 0.18), #020617 80%);
+      color: #e5f2ff;
+      box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.6),
+        0 12px 30px rgba(37, 99, 235, 0.55);
+    }
+
+    @media (max-width: 820px) {
+      .nav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.55rem;
+      }
+
+      .nav-links {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+    }
+
+    /* Layout */
+
+    main {
+      margin-top: 1.4rem;
+    }
+
+    .section {
+      background: linear-gradient(
+          135deg,
+          rgba(15, 23, 42, 0.96),
+          rgba(15, 23, 42, 0.94)
+        );
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      box-shadow: var(--shadow-soft);
+      padding: 1.6rem 1.5rem 1.8rem;
+    }
+
+    @media (max-width: 640px) {
+      .section {
+        padding: 1.3rem 1.2rem 1.5rem;
+      }
+    }
+
+    .eyebrow {
+      font-size: 0.8rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    h1 {
+      font-size: 1.7rem;
+      margin: 0;
+    }
+
+    .page-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-top: 0.55rem;
+      max-width: 42rem;
+    }
+
+    .badge-demo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.78rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: #020617;
+      color: var(--text-muted);
+      margin-top: 0.7rem;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+    }
+
+    .banner {
+      margin-top: 1.4rem;
+      margin-bottom: 1.4rem;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: radial-gradient(circle at left, rgba(59, 164, 255, 0.15), #020617);
+      padding: 0.9rem 1rem;
+      font-size: 0.9rem;
+      color: #d1d5db;
+    }
+
+    .banner strong {
+      color: #e5e7eb;
+    }
+
+    .banner small {
+      display: block;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+      font-size: 0.8rem;
+    }
+
+    /* Content blocks */
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.4fr);
+      gap: 1.5rem;
+      margin-top: 1.6rem;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 860px) {
+      .grid-2 {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    h2 {
+      font-size: 1.15rem;
+      margin-bottom: 0.45rem;
+      margin-top: 1.2rem;
+    }
+
+    p {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: var(--text-main);
+    }
+
+    .muted {
+      color: var(--text-muted);
+    }
+
+    ul {
+      margin: 0.5rem 0 0.3rem 1.1rem;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      line-height: 1.7;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.18rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.95);
+      margin-top: 0.4rem;
+    }
+
+    /* Flow diagram */
+
+    .flow-wrapper {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: radial-gradient(circle at top, rgba(59, 164, 255, 0.12), #020617);
+      padding: 0.95rem 1rem;
+      font-size: 0.86rem;
+    }
+
+    .flow-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      margin-top: 0.4rem;
+    }
+
+    .flow-step {
+      display: flex;
+      gap: 0.55rem;
+      align-items: flex-start;
+    }
+
+    .flow-index {
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: #e5e7eb;
+      background: #020617;
+      flex-shrink: 0;
+      margin-top: 0.05rem;
+    }
+
+    .flow-body {
+      font-size: 0.86rem;
+      color: #d1d5db;
+    }
+
+    .flow-body strong {
+      color: #e5e7eb;
+    }
+
+    /* Graph mock */
+
+    .graph-card {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), #020617);
+      padding: 0.9rem 1rem 1.1rem;
+      font-size: 0.86rem;
+    }
+
+    .graph-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.55rem;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      padding: 0.12rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+    }
+
+    .dot-platform {
+      background: #3b82f6;
+    }
+
+    .dot-narrative {
+      background: #eab308;
+    }
+
+    .dot-risk {
+      background: #f97316;
+    }
+
+    .dot-measure {
+      background: #22c55e;
+    }
+
+    .graph-layout {
+      margin-top: 0.45rem;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.35rem;
+      font-size: 0.78rem;
+    }
+
+    @media (max-width: 880px) {
+      .graph-layout {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .graph-node {
+      border-radius: 0.7rem;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      background: rgba(15, 23, 42, 0.96);
+      padding: 0.4rem 0.55rem;
+      min-height: 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .graph-node h3 {
+      font-size: 0.8rem;
+      margin-bottom: 0.1rem;
+    }
+
+    .graph-node p {
+      font-size: 0.78rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    .node-tag {
+      position: absolute;
+      top: 0.3rem;
+      right: 0.4rem;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--text-muted);
+      opacity: 0.85;
+    }
+
+    .node-platform {
+      border-color: rgba(59, 130, 246, 0.9);
+      background: radial-gradient(circle at top, rgba(37, 99, 235, 0.35), #020617);
+    }
+
+    .node-narrative {
+      border-color: rgba(234, 179, 8, 0.9);
+      background: radial-gradient(circle at top, rgba(234, 179, 8, 0.32), #020617);
+    }
+
+    .node-risk {
+      border-color: rgba(249, 115, 22, 0.95);
+      background: radial-gradient(circle at top, rgba(248, 113, 22, 0.3), #020617);
+    }
+
+    .node-measure {
+      border-color: rgba(34, 197, 94, 0.95);
+      background: radial-gradient(circle at top, rgba(34, 197, 94, 0.32), #020617);
+    }
+
+    /* Use cases / cards */
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 0.8rem;
+    }
+
+    @media (max-width: 950px) {
+      .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .cards {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: rgba(15, 23, 42, 0.95);
+      padding: 0.9rem 1rem 1.05rem;
+      font-size: 0.88rem;
+    }
+
+    .card h3 {
+      font-size: 0.95rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .card p {
+      font-size: 0.86rem;
+      color: var(--text-main);
+    }
+
+    .card small {
+      display: block;
+      margin-top: 0.3rem;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+    }
+
+    .key-list {
+      margin-top: 0.35rem;
+      margin-left: 1.1rem;
+      font-size: 0.86rem;
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    /* Footer */
+
+    footer {
+      margin-top: 1.7rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(148, 163, 184, 0.4);
+      padding-top: 0.9rem;
+      margin-top: 0.6rem;
+    }
+
+    .back-link {
+      color: var(--text-muted);
+    }
+
+    .back-link:hover {
+      color: var(--text-main);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <nav class="nav">
+      <div class="nav-left">
+        <div class="logo">
+          <div class="logo-orbit">
+            <div class="logo-dot"></div>
+          </div>
+        </div>
+        <div class="logo-text-wrapper">
+          <div class="logo-text-main">OpenDefender</div>
+          <div class="logo-text-sub">SnapThreatMap</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a class="nav-link" href="index.html#about">Hva er dette?</a>
+        <a class="nav-link" href="kart.html">Trusselkart</a>
+        <a class="nav-link" href="varsle.html">Varsle anonymt</a>
+        <a class="nav-link" href="om.html">Om prosjektet</a>
+        <a class="nav-link-primary" href="moduler.html">Moduler</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="eyebrow">Fagmodul – kunnskapsgraf</div>
+      <h1>Sociograf: gaming og kriminalitetsnarrativer</h1>
+      <p class="page-subtitle">
+        Denne modulen viser hvordan åpne samtaler om «crime RP» (kriminalitets-rollespill)
+        og lignende miljøer kan modelleres som en kunnskapsgraf på tvers av
+        Reddit, Discord, TikTok og selve spillserverne. Fokus er på narrativer,
+        risiko og forebyggende tiltak – ikke på enkeltpersoner.
+      </p>
+      <div class="badge-demo">
+        <span class="badge-dot"></span>
+        <span>Demo- og kunnskapsmodul – ingen persondata, kun abstraherte mønstre</span>
+      </div>
+
+      <div class="banner">
+        <strong>Utgangspunkt: en Reddit-tråd om «looking for a specific type of crime server»</strong>
+        <small>
+          Ekte struktur – abstrahert innhold. Reddit-posten brukes som eksempel på
+          hvordan én åpen forespørsel kan koble videre til flere Discord-miljøer,
+          TikTok-profiler og spillservere som alle bygger opp rundt samme
+          kriminalitetsnarrativ.
+        </small>
+      </div>
+
+      <!-- Case: fra Reddit til økosystem -->
+      <div class="grid-2">
+        <div>
+          <h2>Fra én tråd til et helt økosystem</h2>
+          <p>
+            I eksempelet ber en spiller om tips til en «crime server» i FiveM
+            (GTA-rollespill). Svarene inneholder beskrivelser av
+            <em>crime RP</em>, avanserte fengselssystemer, smugling, våpen,
+            narkotika, gjenger og «money wash». Nesten alle svar ender i en
+            <strong>Discord-invitasjon</strong>, én peker også videre til
+            <strong>TikTok</strong>.
+          </p>
+          <p class="muted">
+            Slik kan én åpen forespørsel fungere som et nav i et større digitalt
+            økosystem der unge beveger seg mellom plattformer – og der
+            kriminalitet normaliseres som underholdning.
+          </p>
+          <div class="pill">Case-basert på Reddit /r/FiveMServers (abstrahert)</div>
+        </div>
+
+        <div class="flow-wrapper">
+          <strong>Forenklet flyt fra caset</strong>
+          <div class="flow-steps">
+            <div class="flow-step">
+              <div class="flow-index">1</div>
+              <div class="flow-body">
+                <strong>Reddit:</strong> bruker spør etter «serious crime RP» med
+                ønskeliste: smugling, våpen, narkotika, fengselsflukt, black
+                market og money wash.
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-index">2</div>
+              <div class="flow-body">
+                <strong>Svar:</strong> flere servere reklamerer i kommentarfeltet –
+                realistisk kriminalitet, egne gjenger, custom drugs, våpen-crafting,
+                black market pharmacy osv.
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-index">3</div>
+              <div class="flow-body">
+                <strong>Discord:</strong> nesten alle svar lenker direkte til egne
+                Discord-servere hvor rekrutteringen og organiseringen skjer.
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-index">4</div>
+              <div class="flow-body">
+                <strong>TikTok / innhold:</strong> minst én server bruker TikTok
+                til markedsføring av miljøet, klipp fra crime RP og «highlights».
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-index">5</div>
+              <div class="flow-body">
+                <strong>Spillservere:</strong> selve rollespillet skjer på FiveM-
+                serverne, med narrativer som kan ligne ekte gjengkultur,
+                narkotika-økonomi og våpenbruk.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kunnskapsgraf -->
+      <h2>Kunnskapsgraf på tvers av plattformer</h2>
+      <p>
+        Sociograf-modellen oversetter slike miljøer til en kunnskapsgraf. I stedet
+        for å følge enkeltpersoner, modelleres <strong>narrativer, plattformer,
+        risikofaktorer og mulige tiltak</strong> som noder og relasjoner.
+      </p>
+
+      <div class="grid-2">
+        <div>
+          <p class="muted">
+            Hver node i grafen representerer én av fire hovedtyper:
+          </p>
+          <ul>
+            <li><strong>Plattform-noder</strong> – Reddit, Discord, TikTok, FiveM.</li>
+            <li>
+              <strong>Narrativ-noder</strong> – for eksempel <em>Crime RP</em>,
+              fengsels-/contraband-rollespill, drugs &amp; black market,
+              våpen-crafting, gjengkultur og money wash.
+            </li>
+            <li>
+              <strong>Risiko-noder</strong> – normalisering av kriminalitet,
+              rekrutteringsflate for ungdom, mulig grooming-risiko.
+            </li>
+            <li>
+              <strong>Tiltaks-noder</strong> – foreldremøter, undervisningsopplegg,
+              SLT-temamøter, informasjon til foresatte og ungdomsrettede tiltak.
+            </li>
+          </ul>
+          <p class="muted">
+            Grafen kan bygges både manuelt (faglig vurdering av eksempler) og
+            halvautomatisk ved bruk av språkmodeller som identifiserer
+            nøkkelbegreper og koblinger i åpne kilder.
+          </p>
+        </div>
+
+        <div class="graph-card">
+          <div class="graph-legend">
+            <div class="legend-item">
+              <span class="legend-dot dot-platform"></span>
+              <span>Plattform</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot dot-narrative"></span>
+              <span>Narrativ</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot dot-risk"></span>
+              <span>Risiko</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot dot-measure"></span>
+              <span>Tiltak</span>
+            </div>
+          </div>
+          <p class="muted">
+            Forenklet illustrasjon av hvordan caset fra Reddit kan mappes i grafen:
+          </p>
+          <div class="graph-layout">
+            <div class="graph-node node-platform">
+              <span class="node-tag">Plattform</span>
+              <h3>Reddit</h3>
+              <p>Åpen tråd: «Looking for a specific type of crime server».</p>
+            </div>
+            <div class="graph-node node-platform">
+              <span class="node-tag">Plattform</span>
+              <h3>Discord</h3>
+              <p>Rekruttering til flere RP-miljøer med «serious crime».</p>
+            </div>
+            <div class="graph-node node-platform">
+              <span class="node-tag">Plattform</span>
+              <h3>TikTok</h3>
+              <p>Markedsføring av server, klipp fra crime RP og highlights.</p>
+            </div>
+            <div class="graph-node node-platform">
+              <span class="node-tag">Plattform</span>
+              <h3>FiveM-servere</h3>
+              <p>Selve spillmiljøet der narrativene spilles ut daglig.</p>
+            </div>
+
+            <div class="graph-node node-narrative">
+              <span class="node-tag">Narrativ</span>
+              <h3>Crime RP</h3>
+              <p>Realistiske ran, biltyveri, gjenger, våpen og black market.</p>
+            </div>
+            <div class="graph-node node-narrative">
+              <span class="node-tag">Narrativ</span>
+              <h3>Prison &amp; contraband</h3>
+              <p>Fengselsflukt, smugling, hjemmelagde våpen og korrupsjon.</p>
+            </div>
+            <div class="graph-node node-narrative">
+              <span class="node-tag">Narrativ</span>
+              <h3>Drugs &amp; money wash</h3>
+              <p>Produksjon, salg, hvitvasking og økonomisk kriminalitet.</p>
+            </div>
+            <div class="graph-node node-risk">
+              <span class="node-tag">Risiko</span>
+              <h3>Normalisering</h3>
+              <p>Kriminalitet fremstår som «smart spillstrategi» og underholdning.</p>
+            </div>
+            <div class="graph-node node-risk">
+              <span class="node-tag">Risiko</span>
+              <h3>Rekrutteringsflate</h3>
+              <p>Miljøer som kan overlappe med ekte gjeng- og rusmiljøer.</p>
+            </div>
+            <div class="graph-node node-measure">
+              <span class="node-tag">Tiltak</span>
+              <h3>Foreldremøte</h3>
+              <p>Konkrete eksempler på hvordan crime RP fungerer på tvers av plattformer.</p>
+            </div>
+            <div class="graph-node node-measure">
+              <span class="node-tag">Tiltak</span>
+              <h3>Skolemodul</h3>
+              <p>Undervisningsopplegg om gaming, kriminalitet og digitale miljøer.</p>
+            </div>
+            <div class="graph-node node-measure">
+              <span class="node-tag">Tiltak</span>
+              <h3>SLT-temamøte</h3>
+              <p>Felles situasjonsforståelse for skole, politi og øvrige tjenester.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bruk i SLT-arbeid -->
+      <h2>Slik kan SLT og forebyggende tjenester bruke modulen</h2>
+      <p>
+        Sociograf er designet som et <strong>faglig støtteverktøy</strong> – et
+        utgangspunkt for diskusjon og planlegging, ikke et overvåkingssystem. Her
+        er tre typiske anvendelser.
+      </p>
+      <div class="cards">
+        <div class="card">
+          <h3>1. Felles situasjonsbilde i SLT-gruppen</h3>
+          <p>
+            Grafen brukes i SLT-møter til å forklare hvordan gaming-miljøer,
+            Discord-servere og sosiale medier henger sammen. I stedet for enkelthistorier
+            vises <em>mønstre</em> og mulige risiko-konstellasjoner.
+          </p>
+          <ul class="key-list">
+            <li>Synliggjør hvilke narrativer som dominerer.</li>
+            <li>Knytter narrativene til konkrete, lokale tiltak.</li>
+            <li>Gir et felles språk på tvers av etater.</li>
+          </ul>
+          <small>Alle noder er abstrakte; ingen individer eller identifiserbare communities vises.</small>
+        </div>
+
+        <div class="card">
+          <h3>2. Foreldremøter og informasjonsarbeid</h3>
+          <p>
+            Utsnitt av grafen kan brukes i foreldremøter for å forklare hvordan
+            ungdom kan bevege seg fra uskyldig gaming til miljøer som normaliserer
+            kriminalitet og rus. Fokuset er ikke å demonisere spill, men å gi
+            foreldre et konkret bilde av de digitale rommene.
+          </p>
+          <ul class="key-list">
+            <li>Enkel visualisering av «reisen» fra Reddit til Discord og spill.</li>
+            <li>Eksempler på spørsmål foreldre kan stille hjemme.</li>
+            <li>Lenker til undervisnings- og dialogressurser.</li>
+          </ul>
+          <small>Grafen kan brukes som basis for handouts eller korte infosider til foresatte.</small>
+        </div>
+
+        <div class="card">
+          <h3>3. Utvikling av målrettede tiltak</h3>
+          <p>
+            Når det identifiseres et spesielt sterkt narrativ – for eksempel
+            glorifisering av gjengkultur eller «smart hvitvasking» – kan grafen
+            hjelpe med å peke ut hvilke tiltak som er mest relevante og hvem som
+            bør involveres.
+          </p>
+          <ul class="key-list">
+            <li>Match mellom narrativ og foreslått tiltak.</li>
+            <li>Oversikt over hvilke tjenester som naturlig bør inn i arbeidet.</li>
+            <li>Underlag for prosjektbeskrivelser og søknader.</li>
+          </ul>
+          <small>Modellen kan suppleres med lokale erfaringer og forskningsdata.</small>
+        </div>
+      </div>
+
+      <!-- Personvern og etikk -->
+      <h2>Personvern, etikk og videre utvikling</h2>
+      <p>
+        Sociograf-modulen er laget som en <strong>demonstrator</strong>. I en
+        eventuell pilot i en kommune eller region må alt innhold forankres lokalt,
+        og bygges på <strong>aggregerte og anonymiserte data</strong>. Modellen
+        kan videreutvikles til å inkludere:
+      </p>
+      <ul>
+        <li>flere tekstkilder (for eksempel åpne forum og kommentarfelt),</li>
+        <li>lokalt innhentede erfaringer fra skole, politi og ungdomsarbeid,</li>
+        <li>forskningsbaserte vekter for risiko og beskyttende faktorer.</li>
+      </ul>
+      <p class="muted">
+        Hovedprinsippet er at grafen skal vise <em>fenomener og mønstre</em>, ikke
+        kartlegge enkeltpersoner. Slik kan OpenDefender brukes til forebygging,
+        dialog og kunnskapsdeling – innenfor rammer som ivaretar både personvern
+        og tillit.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div>© OpenDefender Initiative – SnapThreatMap</div>
+      <a href="moduler.html" class="back-link">Tilbake til moduloversikten</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
